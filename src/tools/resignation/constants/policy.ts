@@ -1,18 +1,20 @@
-// 2025년 기준 고용보험 정책 상수
+// 2026년 기준 고용보험 정책 상수
+// 출처: 고용노동부 고시, 고용보험 안내
 // 매년 최저임금 개정 시 이 파일만 수정하면 됩니다
 
-export const POLICY_YEAR = 2025
+export const POLICY_YEAR = 2026
 
 // 실업급여 (구직급여)
 export const UNEMPLOYMENT = {
-  replaceRate: 0.6,           // 평균임금의 60%
-  dailyUpperLimit: 66_000,    // 1일 상한액 (2025)
-  lowerRate: 0.8,             // 최저임금의 80%
-  minimumHourlyWage: 10_030,  // 최저시급 (2025)
+  replaceRate: 0.6,             // 평균임금의 60%
+  dailyUpperLimit: 68_100,      // 1일 상한액 (2026) — 임금일액 상한 113,500원 × 60%
+  wageBaseUpperLimit: 113_500,  // 임금일액 상한 (2026) — 기존 110,000원에서 상향
+  lowerRate: 0.8,               // 최저임금의 80%
+  minimumHourlyWage: 10_320,    // 최저시급 (2026)
   standardDailyHours: 8,
   get dailyLowerLimit() {
     return Math.floor(this.minimumHourlyWage * this.lowerRate * this.standardDailyHours)
-    // 10030 * 0.8 * 8 = 64,192원
+    // 10,320 × 0.8 × 8 = 66,048원
   },
 } as const
 
