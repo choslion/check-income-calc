@@ -1,11 +1,9 @@
 import { BudgetProvider, useBudget } from './context/BudgetContext'
-import { ThemeProvider } from './context/ThemeContext'
 import { SalaryInput } from './components/SalaryInput'
 import { ExpenseList } from './components/ExpenseList'
 import { SavingsTargetInput } from './components/SavingsTargetInput'
 import { BudgetSummary } from './components/BudgetSummary'
 import { BudgetFeedback } from './components/BudgetFeedback'
-import { ThemeSwitch } from './components/ThemeSwitch'
 import { AnnualSavingsProjection } from './components/AnnualSavingsProjection'
 import { GoalAchievementCalculator } from './components/GoalAchievementCalculator'
 import { SpendingHealthScore } from './components/SpendingHealthScore'
@@ -45,10 +43,7 @@ function Calculator() {
               월급 계산기
             </h1>
           </div>
-          <div className="flex items-center gap-2">
-            <ThemeSwitch />
-            <ResetButton />
-          </div>
+          <ResetButton />
         </div>
 
         {/* 피드백 */}
@@ -83,10 +78,8 @@ function Calculator() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <BudgetProvider>
-        <Calculator />
-      </BudgetProvider>
-    </ThemeProvider>
+    <BudgetProvider>
+      <Calculator />
+    </BudgetProvider>
   )
 }
