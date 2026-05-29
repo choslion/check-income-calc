@@ -28,6 +28,14 @@ export const TOOLS: Tool[] = [
     status: 'available',
   },
   {
+    id: 'waste-sorting',
+    title: '이거 어디 버려?',
+    description: '음식물쓰레기인지 일반쓰레기인지 헷갈리는 항목을 빠르게 확인하세요.',
+    path: '/tools/waste-sorting',
+    category: 'utility',
+    status: 'available',
+  },
+  {
     id: 'subscription',
     title: '구독 계산기',
     description: '매달 나가는 구독료를 한눈에 정리하고 연간 비용을 확인하세요.',
