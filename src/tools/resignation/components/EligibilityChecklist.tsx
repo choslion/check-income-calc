@@ -32,7 +32,7 @@ export function EligibilityChecklist({ data, status, onChange }: Props) {
         {ITEMS.map(({ key, label }) => (
           <label
             key={key}
-            className="flex items-center gap-3 cursor-pointer"
+            className="flex items-center gap-3 cursor-pointer w-fit"
             onClick={() => onChange(key, !data[key])}
           >
             <div
