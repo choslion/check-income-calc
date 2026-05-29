@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { ChevronRight } from 'lucide-react'
 import type { Tool } from '../../data/tools'
 
 interface Props {
@@ -47,7 +48,7 @@ export function ToolCard({ tool }: Props) {
       </p>
       {isAvailable && (
         <p className="text-xs font-semibold mt-1" style={{ color: 'var(--primary)' }}>
-          바로가기 →
+          <span className="flex items-center gap-0.5">바로가기 <ChevronRight size={13} /></span>
         </p>
       )}
     </div>

@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { ChevronRight } from 'lucide-react'
 import { TOOLS, getToolById } from '../data/tools'
 import { getLastUsedTool } from '../utils/recentTools'
 import { ToolCard } from '../components/tools/ToolCard'
@@ -39,7 +40,7 @@ function BudgetPreviewCard() {
           className="mt-1 text-xs font-semibold self-start"
           style={{ color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
         >
-          예산 계산기 시작하기 →
+          예산 계산기 시작하기
         </button>
       </div>
     )
@@ -110,7 +111,7 @@ function RecentToolCard() {
         <p className="text-xs mb-0.5" style={{ color: 'var(--muted)' }}>최근 사용 · {dateStr}</p>
         <p className="text-sm font-semibold" style={{ color: 'var(--on-dark)' }}>{tool.title}</p>
       </div>
-      <span style={{ color: 'var(--primary)', fontSize: '18px' }}>→</span>
+      <ChevronRight size={18} style={{ color: 'var(--primary)', flexShrink: 0 }} />
     </div>
   )
 }
