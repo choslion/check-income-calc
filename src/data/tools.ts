@@ -20,6 +20,14 @@ export const TOOLS: Tool[] = [
     status: 'available',
   },
   {
+    id: 'resignation',
+    title: '퇴사 정산 계산기',
+    description: '퇴직금, 실업급여, 퇴사 후 생활 가능 기간을 한번에 추정하세요.',
+    path: '/tools/resignation',
+    category: 'work',
+    status: 'available',
+  },
+  {
     id: 'subscription',
     title: '구독 계산기',
     description: '매달 나가는 구독료를 한눈에 정리하고 연간 비용을 확인하세요.',
