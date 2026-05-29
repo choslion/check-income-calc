@@ -8,10 +8,7 @@ interface Props {
   type: 'fixed' | 'variable'
 }
 
-const LABELS = {
-  fixed: '고정 지출',
-  variable: '변동 지출',
-}
+const LABELS = { fixed: '고정 지출', variable: '변동 지출' }
 
 export function ExpenseList({ type }: Props) {
   const { state, dispatch } = useBudget()
@@ -37,13 +34,13 @@ export function ExpenseList({ type }: Props) {
   }
 
   return (
-    <div className="rounded-[20px] p-6" style={{ backgroundColor: 'var(--color-surface-elevated)' }}>
+    <div style={{ backgroundColor: 'var(--surface-card)', borderRadius: 'var(--radius-card)', padding: '24px' }}>
       <div className="flex items-center justify-between mb-4">
-        <p className="text-xs font-semibold tracking-widest uppercase" style={{ color: 'var(--color-on-dark-mute)' }}>
+        <p className="text-xs font-semibold tracking-widest uppercase" style={{ color: 'var(--on-dark-mute)' }}>
           {LABELS[type]}
         </p>
         {total > 0 && (
-          <span className="text-sm font-semibold" style={{ color: 'var(--color-on-dark)' }}>
+          <span className="text-sm font-semibold" style={{ color: 'var(--on-dark)', fontFamily: 'var(--font-number)' }}>
             {formatKRW(total)}원
           </span>
         )}
@@ -56,17 +53,21 @@ export function ExpenseList({ type }: Props) {
       </div>
 
       {items.length === 0 && (
-        <p className="text-sm text-center py-4" style={{ color: 'var(--color-on-dark-mute)' }}>
+        <p className="text-sm text-center py-4" style={{ color: 'var(--on-dark-mute)' }}>
           등록된 항목이 없습니다
         </p>
       )}
 
       <button
         onClick={handleAdd}
-        className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-colors"
-        style={{ color: 'var(--color-ink)', backgroundColor: 'var(--color-canvas-light)' }}
-        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-surface-soft)')}
-        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-canvas-light)')}
+        className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-colors"
+        style={{
+          color: 'var(--on-primary)',
+          backgroundColor: 'var(--primary)',
+          borderRadius: 'var(--radius-pill)',
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary-hover)')}
+        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary)')}
       >
         <Plus size={15} />
         항목 추가

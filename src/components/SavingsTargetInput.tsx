@@ -22,15 +22,15 @@ export function SavingsTargetInput() {
   }
 
   return (
-    <div className="rounded-[20px] p-6" style={{ backgroundColor: 'var(--color-surface-elevated)' }}>
+    <div style={{ backgroundColor: 'var(--surface-card)', borderRadius: 'var(--radius-card)', padding: '24px' }}>
       <div className="flex items-center justify-between mb-4">
-        <p className="text-xs font-semibold tracking-widest uppercase" style={{ color: 'var(--color-on-dark-mute)' }}>
+        <p className="text-xs font-semibold tracking-widest uppercase" style={{ color: 'var(--on-dark-mute)' }}>
           저축 목표
         </p>
         {state.salary > 0 && (
-          <span className="text-xs" style={{ color: 'var(--color-on-dark-mute)' }}>
+          <span className="text-xs" style={{ color: 'var(--on-dark-mute)' }}>
             최대{' '}
-            <span className="font-semibold" style={{ color: 'var(--color-on-dark)' }}>
+            <span className="font-semibold" style={{ color: 'var(--on-dark)', fontFamily: 'var(--font-number)' }}>
               {formatKRW(maxSavings)}원
             </span>
           </span>
@@ -45,22 +45,24 @@ export function SavingsTargetInput() {
           onChange={handleChange}
           onBlur={handleBlur}
           placeholder="0"
-          className="w-full rounded-xl px-4 py-3 pr-12 text-right text-lg font-medium outline-none transition-all"
+          className="w-full px-4 py-3 pr-12 text-right text-lg font-medium outline-none transition-all"
           style={{
-            backgroundColor: 'var(--color-surface-deep)',
-            color: 'var(--color-on-dark)',
-            border: `1px solid ${isOverBudget ? 'var(--color-danger)' : 'var(--color-hairline-dark)'}`,
+            backgroundColor: 'var(--surface-input)',
+            color: 'var(--on-dark)',
+            border: `1px solid ${isOverBudget ? 'var(--danger)' : 'var(--hairline)'}`,
+            borderRadius: 'var(--radius-input)',
+            fontFamily: 'var(--font-number)',
           }}
-          onFocus={(e) => (e.target.style.borderColor = isOverBudget ? 'var(--color-danger)' : 'rgba(255,255,255,0.4)')}
-          onBlurCapture={(e) => (e.target.style.borderColor = isOverBudget ? 'var(--color-danger)' : 'var(--color-hairline-dark)')}
+          onFocus={(e) => (e.target.style.borderColor = isOverBudget ? 'var(--danger)' : 'var(--info)')}
+          onBlurCapture={(e) => (e.target.style.borderColor = isOverBudget ? 'var(--danger)' : 'var(--hairline)')}
         />
-        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--color-on-dark-mute)' }}>
+        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--muted)' }}>
           원
         </span>
       </div>
 
       {isOverBudget && (
-        <p className="text-xs mt-2" style={{ color: 'var(--color-danger)' }}>
+        <p className="text-xs mt-2" style={{ color: 'var(--danger)' }}>
           지출 후 잔액보다 목표가 높습니다
         </p>
       )}

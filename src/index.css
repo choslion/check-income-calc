@@ -1,55 +1,71 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
-:root {
-  /* Brand */
-  --color-primary: #494fdf;
-  --color-primary-bright: #4f55f1;
-  --color-primary-deep: #3a40c4;
-  --color-on-primary: #ffffff;
+/* ── Binance 테마 ────────────────────────────────────── */
+[data-theme="binance"] {
+  --canvas:           #0b0e11;
+  --surface-card:     #1e2329;
+  --surface-input:    #2b3139;
+  --hairline:         #2b3139;
 
-  /* Canvas */
-  --color-canvas-dark: #000000;
-  --color-canvas-light: #ffffff;
-  --color-surface-soft: #f4f4f4;
-  --color-surface-deep: #0a0a0a;
-  --color-surface-elevated: #16181a;
+  --primary:          #fcd535;
+  --primary-hover:    #f0b90b;
+  --on-primary:       #181a20;
 
-  /* Text on dark */
-  --color-on-dark: #ffffff;
-  --color-on-dark-mute: rgba(255,255,255,0.72);
+  --on-dark:          #ffffff;
+  --on-dark-mute:     #929aa5;
+  --muted:            #707a8a;
 
-  /* Text on light */
-  --color-ink: #191c1f;
-  --color-muted: #505a63;
-  --color-stone: #8d969e;
+  --success:          #0ecb81;
+  --danger:           #f6465d;
+  --info:             #3b82f6;
 
-  /* Borders */
-  --color-hairline-dark: rgba(255,255,255,0.12);
-  --color-hairline-light: #e2e2e7;
-  --color-hairline-strong: #191c1f;
+  --radius-card:      12px;
+  --radius-button:    6px;
+  --radius-input:     8px;
+  --radius-pill:      9999px;
 
-  /* Semantic */
-  --color-success: #428619;
-  --color-danger: #e23b4a;
-
-  /* Fonts */
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-number:      "IBM Plex Mono", ui-monospace, monospace;
 }
 
-* {
-  box-sizing: border-box;
+/* ── Revolut 테마 ────────────────────────────────────── */
+[data-theme="revolut"] {
+  --canvas:           #000000;
+  --surface-card:     #16181a;
+  --surface-input:    #0a0a0a;
+  --hairline:         rgba(255, 255, 255, 0.12);
+
+  --primary:          #ffffff;
+  --primary-hover:    #f4f4f4;
+  --on-primary:       #000000;
+
+  --on-dark:          #ffffff;
+  --on-dark-mute:     rgba(255, 255, 255, 0.6);
+  --muted:            rgba(255, 255, 255, 0.4);
+
+  --success:          #428619;
+  --danger:           #e23b4a;
+  --info:             rgba(255, 255, 255, 0.4);
+
+  --radius-card:      20px;
+  --radius-button:    9999px;
+  --radius-input:     12px;
+  --radius-pill:      9999px;
+
+  --font-number:      "Inter", sans-serif;
 }
+
+/* ── 공통 ────────────────────────────────────────────── */
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
-  background-color: var(--color-canvas-dark);
-  color: var(--color-on-dark);
-  font-family: var(--font-sans);
+  background-color: var(--canvas);
+  color: var(--on-dark);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-#root {
-  min-height: 100svh;
-}
+#root { min-height: 100svh; }
