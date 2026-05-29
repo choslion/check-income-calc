@@ -1,5 +1,11 @@
-import { UNEMPLOYMENT, BENEFIT_DURATION_RULES } from '../constants/policy'
+import { BENEFIT_DURATION_RULES } from '../constants/policy'
 import type { ResignationState, EligibilityStatus, ResignationReason } from '../types'
+
+interface UnemploymentPolicy {
+  replaceRate: number
+  dailyUpperLimit: number
+  dailyLowerLimit: number
+}
 
 // ── 날짜 유틸 ────────────────────────────────────────────────────────────────
 
@@ -55,12 +61,12 @@ export function calcSeverancePay(
 
 // ── 실업급여 ─────────────────────────────────────────────────────────────────
 
-export function calcDailyUnemploymentBenefit(averageDailyWage: number): number {
-  const raw = averageDailyWage * UNEMPLOYMENT.replaceRate
-  return Math.max(
-    UNEMPLOYMENT.dailyLowerLimit,
-    Math.min(raw, UNEMPLOYMENT.dailyUpperLimit)
-  )
+export function calcDailyUnemploymentBenefit(
+  averageDailyWage: number,
+  policy: UnemploymentPolicy
+): number {
+  const raw = averageDailyWage * policy.replaceRate
+  return Math.max(policy.dailyLowerLimit, Math.min(raw, policy.dailyUpperLimit))
 }
 
 export function calcBenefitDurationDays(age: number, insuranceYears: number): number | null {

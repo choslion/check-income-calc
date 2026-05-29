@@ -3,6 +3,7 @@ import { RotateCcw } from 'lucide-react'
 import type { ResignationState, EligibilityChecklist as EligibilityChecklistType } from './types'
 import { loadResignationState, saveResignationState, clearResignationState, DEFAULT_STATE } from './storage'
 import { calcEligibilityStatus } from './utils/calc'
+import { getPolicyForResignation } from './utils/policyLoader'
 import { EmploymentInfoForm } from './components/EmploymentInfoForm'
 import { SalaryInfoForm } from './components/SalaryInfoForm'
 import { PensionTypeSelector } from './components/PensionTypeSelector'
@@ -42,6 +43,7 @@ export function ResignationCalculator() {
   }
 
   const eligibilityStatus = calcEligibilityStatus(state.resignationReason, state.checklist)
+  const policy = getPolicyForResignation(state.employment.resignationDate)
 
   return (
     <div className="px-4 py-8">
@@ -101,7 +103,7 @@ export function ResignationCalculator() {
         />
 
         {/* 면책 고지 */}
-        <Disclaimer />
+        <Disclaimer policyYear={policy?.year} />
 
         <p className="text-xs text-center pt-2" style={{ color: 'var(--muted)' }}>
           입력한 데이터는 이 기기에만 저장됩니다

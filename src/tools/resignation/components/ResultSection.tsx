@@ -1,7 +1,7 @@
 import { Download } from 'lucide-react'
 import { SectionCard, ResultRow, AmountField } from './shared'
 import { formatKRW } from '../../../lib/calc'
-import { POLICY_YEAR, UNEMPLOYMENT } from '../constants/policy'
+import { getPolicyForResignation } from '../utils/policyLoader'
 import type { ResignationState } from '../types'
 import {
   calcEmploymentDays,
@@ -40,6 +40,9 @@ function loadBudgetExpenses(): number | null {
 export function ResultSection({ state, onSurvivalChange }: Props) {
   const { employment, salary, survival, pensionType } = state
 
+  // 퇴사일 기준 정책 로드
+  const policy = getPolicyForResignation(employment.resignationDate)
+
   // 계산값 도출
   const totalDays = calcEmploymentDays(employment.hireDate, employment.resignationDate)
   const age = calcAge(employment.birthYear)
@@ -60,8 +63,8 @@ export function ResultSection({ state, onSurvivalChange }: Props) {
     ? calcSeverancePay(avgDailyWage, totalDays)
     : null
 
-  const dailyBenefit = avgDailyWage
-    ? calcDailyUnemploymentBenefit(avgDailyWage)
+  const dailyBenefit = avgDailyWage && policy
+    ? calcDailyUnemploymentBenefit(avgDailyWage, policy)
     : null
 
   const benefitDays = age && insurancePeriodYears > 0
@@ -115,12 +118,34 @@ export function ResultSection({ state, onSurvivalChange }: Props) {
         </SectionCard>
       )}
 
+      {/* 실업급여 — 정책 데이터 없음 fallback */}
+      {avgDailyWage && !policy && employment.resignationDate && (
+        <SectionCard title="실업급여 추정">
+          <p className="text-sm" style={{ color: '#f59e0b' }}>
+            {new Date(employment.resignationDate).getFullYear()}년 기준 정책 데이터가 아직 준비되지 않았습니다.
+            실업급여 계산을 위해 퇴사일을 다시 확인해주세요.
+          </p>
+        </SectionCard>
+      )}
+
       {/* 실업급여 */}
-      {dailyBenefit && (
-        <SectionCard title={`실업급여 추정 (${POLICY_YEAR}년 기준)`}>
+      {dailyBenefit && policy && (
+        <SectionCard title="실업급여 추정">
+          {/* 연도 뱃지 */}
+          <div className="flex items-center gap-2 mb-3">
+            <span
+              className="text-xs px-2 py-0.5 font-semibold"
+              style={{ backgroundColor: 'rgba(252,213,53,0.1)', color: 'var(--primary)', borderRadius: 'var(--radius-pill)' }}
+            >
+              {policy.year}년 기준
+            </span>
+            <span className="text-xs" style={{ color: 'var(--muted)' }}>
+              업데이트: {policy.updatedAt}
+            </span>
+          </div>
           <div>
             <ResultRow label="평균 일급" value={`${formatKRW(Math.round(avgDailyWage!))}원`} />
-            <ResultRow label={`추정 일 수령액 (상한 ${formatKRW(UNEMPLOYMENT.dailyUpperLimit)}원)`} value={`${formatKRW(Math.round(dailyBenefit))}원`} />
+            <ResultRow label={`추정 일 수령액 (상한 ${formatKRW(policy.dailyUpperLimit)}원)`} value={`${formatKRW(Math.round(dailyBenefit))}원`} />
             {benefitDays ? (
               <>
                 <ResultRow label="추정 지급 기간" value={`${benefitDays}일`} />
@@ -131,6 +156,12 @@ export function ResultSection({ state, onSurvivalChange }: Props) {
                 출생연도와 피보험 기간을 입력하면 지급 기간을 확인할 수 있습니다.
               </p>
             )}
+          </div>
+          {/* 출처 */}
+          <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--hairline)' }}>
+            <p className="text-xs" style={{ color: 'var(--muted)' }}>
+              출처: {policy.sources.map(s => s.name).join(' · ')}
+            </p>
           </div>
         </SectionCard>
       )}

@@ -1,0 +1,38 @@
+{
+  "2025": {
+    "year": 2025,
+    "minimumWage": 10030,
+    "basicDailyWageCap": 110000,
+    "dailyUpperLimit": 66000,
+    "dailyLowerLimit": 64192,
+    "monthlyUpperLimit": 1980000,
+    "monthlyLowerLimit": 1925760,
+    "replaceRate": 0.6,
+    "lowerRate": 0.8,
+    "standardDailyHours": 8,
+    "effectiveFrom": "2025-01-01",
+    "sources": [
+      { "name": "고용노동부 최저임금 고시", "type": "official_notice" },
+      { "name": "고용보험법 시행령 제68조", "type": "law" }
+    ],
+    "updatedAt": "2025-01-01"
+  },
+  "2026": {
+    "year": 2026,
+    "minimumWage": 10320,
+    "basicDailyWageCap": 113500,
+    "dailyUpperLimit": 68100,
+    "dailyLowerLimit": 66048,
+    "monthlyUpperLimit": 2043000,
+    "monthlyLowerLimit": 1981440,
+    "replaceRate": 0.6,
+    "lowerRate": 0.8,
+    "standardDailyHours": 8,
+    "effectiveFrom": "2026-01-01",
+    "sources": [
+      { "name": "고용노동부 최저임금 고시", "type": "official_notice" },
+      { "name": "고용보험법 시행령 제68조", "type": "law" }
+    ],
+    "updatedAt": "2026-01-01"
+  }
+}

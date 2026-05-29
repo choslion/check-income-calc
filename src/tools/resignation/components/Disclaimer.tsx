@@ -1,7 +1,7 @@
 import { AlertTriangle } from 'lucide-react'
-import { POLICY_YEAR } from '../constants/policy'
 
-export function Disclaimer() {
+export function Disclaimer({ policyYear }: { policyYear?: number }) {
+  const year = policyYear ?? new Date().getFullYear()
   return (
     <div
       className="p-4 rounded-xl flex gap-3"
@@ -10,7 +10,7 @@ export function Disclaimer() {
       <AlertTriangle size={16} style={{ color: 'var(--muted)', flexShrink: 0, marginTop: '2px' }} />
       <div className="space-y-1.5">
         <p className="text-xs font-semibold" style={{ color: 'var(--on-dark-mute)' }}>
-          참고용 추정 계산기 ({POLICY_YEAR}년 기준)
+          참고용 추정 계산기 ({year}년 기준)
         </p>
         <ul className="text-xs space-y-1" style={{ color: 'var(--muted)' }}>
           <li>· 이 계산기의 결과는 법적 효력이 없는 참고용 추정치입니다.</li>
