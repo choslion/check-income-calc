@@ -48,7 +48,7 @@ export function EmploymentInfoForm({ data, onChange }: Props) {
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 items-end">
           <Field
             label="출생연도"
             type="number"

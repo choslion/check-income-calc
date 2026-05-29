@@ -32,15 +32,15 @@ export function EligibilityChecklist({ data, status, onChange }: Props) {
         {ITEMS.map(({ key, label }) => (
           <label
             key={key}
-            className="flex items-start gap-3 cursor-pointer"
+            className="flex items-center gap-3 cursor-pointer"
+            onClick={() => onChange(key, !data[key])}
           >
             <div
-              className="w-5 h-5 rounded flex items-center justify-center shrink-0 mt-0.5 transition-colors"
+              className="w-5 h-5 rounded flex items-center justify-center shrink-0 transition-colors"
               style={{
                 backgroundColor: data[key] ? 'var(--primary)' : 'var(--surface-input)',
                 border: `1px solid ${data[key] ? 'var(--primary)' : 'var(--hairline)'}`,
               }}
-              onClick={() => onChange(key, !data[key])}
             >
               {data[key] && (
                 <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
