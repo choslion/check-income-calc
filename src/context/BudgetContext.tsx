@@ -6,6 +6,8 @@ import { MAX_AMOUNT } from '../lib/calc'
 type Action =
   | { type: 'SET_SALARY'; payload: number }
   | { type: 'SET_SAVINGS_TARGET'; payload: number }
+  | { type: 'SET_GOAL_TARGET'; payload: number }
+  | { type: 'SET_GOAL_CURRENT_SAVED'; payload: number }
   | { type: 'ADD_FIXED_EXPENSE' }
   | { type: 'ADD_VARIABLE_EXPENSE' }
   | { type: 'UPDATE_FIXED_EXPENSE'; payload: ExpenseItem }
@@ -25,6 +27,12 @@ function reducer(state: BudgetState, action: Action): BudgetState {
 
     case 'SET_SAVINGS_TARGET':
       return { ...state, savingsTarget: clampAmount(action.payload) }
+
+    case 'SET_GOAL_TARGET':
+      return { ...state, goalTarget: clampAmount(action.payload) }
+
+    case 'SET_GOAL_CURRENT_SAVED':
+      return { ...state, goalCurrentSaved: clampAmount(action.payload) }
 
     case 'ADD_FIXED_EXPENSE':
       return {

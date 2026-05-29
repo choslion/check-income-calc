@@ -13,6 +13,8 @@ const DEFAULT_STATE: BudgetState = {
     { id: crypto.randomUUID(), name: '교통비', amount: 80000 },
   ],
   savingsTarget: 0,
+  goalTarget: 0,
+  goalCurrentSaved: 0,
 }
 
 export function loadState(): BudgetState {
@@ -51,7 +53,12 @@ export function loadState(): BudgetState {
       return DEFAULT_STATE
     }
 
-    return parsed as BudgetState
+    // 구 버전 호환: goalTarget/goalCurrentSaved 없으면 0으로 채움
+    return {
+      ...parsed,
+      goalTarget: typeof parsed.goalTarget === 'number' ? parsed.goalTarget : 0,
+      goalCurrentSaved: typeof parsed.goalCurrentSaved === 'number' ? parsed.goalCurrentSaved : 0,
+    } as BudgetState
   } catch {
     return DEFAULT_STATE
   }

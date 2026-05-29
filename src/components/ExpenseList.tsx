@@ -13,7 +13,8 @@ const LABELS = { fixed: '고정 지출', variable: '변동 지출' }
 export function ExpenseList({ type }: Props) {
   const { state, dispatch } = useBudget()
   const items = type === 'fixed' ? state.fixedExpenses : state.variableExpenses
-  const total = items.reduce((sum, e) => sum + e.amount, 0)
+  // 이름 있는 항목만 합계 표시
+  const total = items.filter(e => e.name.trim() !== '').reduce((sum, e) => sum + e.amount, 0)
 
   function handleAdd() {
     dispatch({ type: type === 'fixed' ? 'ADD_FIXED_EXPENSE' : 'ADD_VARIABLE_EXPENSE' })
@@ -48,7 +49,13 @@ export function ExpenseList({ type }: Props) {
 
       <div className="space-y-3">
         {items.map((item) => (
-          <ExpenseItem key={item.id} item={item} onUpdate={handleUpdate} onDelete={handleDelete} />
+          <ExpenseItem
+            key={item.id}
+            item={item}
+            salary={state.salary}
+            onUpdate={handleUpdate}
+            onDelete={handleDelete}
+          />
         ))}
       </div>
 
@@ -61,11 +68,7 @@ export function ExpenseList({ type }: Props) {
       <button
         onClick={handleAdd}
         className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-colors"
-        style={{
-          color: 'var(--on-primary)',
-          backgroundColor: 'var(--primary)',
-          borderRadius: 'var(--radius-pill)',
-        }}
+        style={{ color: 'var(--on-primary)', backgroundColor: 'var(--primary)', borderRadius: 'var(--radius-pill)' }}
         onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary-hover)')}
         onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary)')}
       >

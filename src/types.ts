@@ -9,6 +9,8 @@ export interface BudgetState {
   fixedExpenses: ExpenseItem[]
   variableExpenses: ExpenseItem[]
   savingsTarget: number
+  goalTarget: number
+  goalCurrentSaved: number
 }
 
 export interface BudgetCalculation {
@@ -19,4 +21,6 @@ export interface BudgetCalculation {
   remainingAfterSavings: number
   savingsAchievable: boolean
   expenseRatio: number
+  annualSavings: number
+  healthScore: number
 }

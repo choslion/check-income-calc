@@ -41,13 +41,14 @@ function getFeedback(
     color: 'var(--success)', bg: 'rgba(66,134,25,0.08)', border: 'rgba(66,134,25,0.3)',
   }
 
-  if (expenseRatio <= 50 && remainingAfterExpenses > 0) return {
-    message: '지출 비율이 양호합니다. 저축 목표를 설정해보세요.',
+  // 저축 목표 미설정 시 더 친절한 메시지
+  if (expenseRatio <= 50) return {
+    message: '지출 비율이 낮습니다. 저축 목표를 설정하면 월간·연간 저축 계획을 확인할 수 있습니다.',
     color: 'var(--success)', bg: 'rgba(66,134,25,0.08)', border: 'rgba(66,134,25,0.3)',
   }
 
   return {
-    message: '수지 균형이 맞습니다. 저축 목표를 설정해보세요.',
+    message: '수지 균형이 맞습니다. 저축 목표를 설정하면 월간·연간 저축 계획을 확인할 수 있습니다.',
     color: 'var(--on-dark-mute)', bg: 'var(--surface-card)', border: 'var(--hairline)',
   }
 }
@@ -63,11 +64,11 @@ export function BudgetFeedback() {
 
   return (
     <div
-      className="px-5 py-4 flex items-center gap-3"
+      className="px-5 py-4 flex items-start gap-3"
       style={{ backgroundColor: fb.bg, border: `1px solid ${fb.border}`, borderRadius: 'var(--radius-card)' }}
     >
-      <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: fb.color }} />
-      <p className="text-sm font-medium" style={{ color: fb.color }}>{fb.message}</p>
+      <div className="w-2 h-2 rounded-full shrink-0 mt-1" style={{ backgroundColor: fb.color }} />
+      <p className="text-sm font-medium leading-relaxed" style={{ color: fb.color }}>{fb.message}</p>
     </div>
   )
 }
