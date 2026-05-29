@@ -1,0 +1,57 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
+
+:root {
+  /* Brand */
+  --color-primary: #fcd535;
+  --color-primary-active: #f0b90b;
+  --color-primary-disabled: #3a3a1f;
+
+  /* Canvas */
+  --color-canvas-dark: #0b0e11;
+  --color-surface-card-dark: #1e2329;
+  --color-surface-elevated-dark: #2b3139;
+
+  /* Text */
+  --color-on-dark: #ffffff;
+  --color-body: #eaecef;
+  --color-muted: #707a8a;
+  --color-muted-strong: #929aa5;
+  --color-on-primary: #181a20;
+
+  /* Borders */
+  --color-hairline-on-dark: #2b3139;
+
+  /* Trading */
+  --color-trading-up: #0ecb81;
+  --color-trading-down: #f6465d;
+
+  /* Info */
+  --color-info: #3b82f6;
+
+  /* Fonts */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", "JetBrains Mono", ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-canvas-dark);
+  color: var(--color-body);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+/* 숫자 표시용 폰트 */
+.font-mono {
+  font-family: var(--font-mono);
+}
