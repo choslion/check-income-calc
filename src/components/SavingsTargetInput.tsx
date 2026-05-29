@@ -8,6 +8,7 @@ export function SavingsTargetInput() {
 
   const calc = calculate(state)
   const maxSavings = Math.max(0, calc.remainingAfterExpenses)
+  const isOverBudget = state.salary > 0 && state.savingsTarget > maxSavings
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const input = e.target.value.replace(/,/g, '').replace(/[^0-9]/g, '')
@@ -20,30 +21,21 @@ export function SavingsTargetInput() {
     setRaw(state.savingsTarget > 0 ? formatKRW(state.savingsTarget) : '')
   }
 
-  const isOverBudget = state.salary > 0 && state.savingsTarget > maxSavings
-
   return (
-    <div
-      className="rounded-xl p-6"
-      style={{ backgroundColor: 'var(--color-surface-card-dark)' }}
-    >
-      <h2
-        className="text-base font-semibold mb-1"
-        style={{ color: 'var(--color-on-dark)' }}
-      >
-        저축 목표
-      </h2>
-
-      {state.salary > 0 && (
-        <p className="text-xs mb-4" style={{ color: 'var(--color-muted)' }}>
-          지출 후 가능 최대:{' '}
-          <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-muted-strong)' }}>
-            {formatKRW(maxSavings)}원
-          </span>
+    <div className="rounded-[20px] p-6" style={{ backgroundColor: 'var(--color-surface-elevated)' }}>
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-xs font-semibold tracking-widest uppercase" style={{ color: 'var(--color-on-dark-mute)' }}>
+          저축 목표
         </p>
-      )}
-
-      {!state.salary && <div className="mb-4" />}
+        {state.salary > 0 && (
+          <span className="text-xs" style={{ color: 'var(--color-on-dark-mute)' }}>
+            최대{' '}
+            <span className="font-semibold" style={{ color: 'var(--color-on-dark)' }}>
+              {formatKRW(maxSavings)}원
+            </span>
+          </span>
+        )}
+      </div>
 
       <div className="relative">
         <input
@@ -53,34 +45,22 @@ export function SavingsTargetInput() {
           onChange={handleChange}
           onBlur={handleBlur}
           placeholder="0"
-          className="w-full rounded-md px-4 py-3 pr-14 text-right font-mono text-lg outline-none transition-all"
+          className="w-full rounded-xl px-4 py-3 pr-12 text-right text-lg font-medium outline-none transition-all"
           style={{
-            backgroundColor: 'var(--color-surface-elevated-dark)',
+            backgroundColor: 'var(--color-surface-deep)',
             color: 'var(--color-on-dark)',
-            border: `1px solid ${isOverBudget ? 'var(--color-trading-down)' : 'var(--color-hairline-on-dark)'}`,
-            fontFamily: 'var(--font-mono)',
+            border: `1px solid ${isOverBudget ? 'var(--color-danger)' : 'var(--color-hairline-dark)'}`,
           }}
-          onFocus={(e) =>
-            (e.target.style.borderColor = isOverBudget
-              ? 'var(--color-trading-down)'
-              : 'var(--color-info)')
-          }
-          onBlurCapture={(e) =>
-            (e.target.style.borderColor = isOverBudget
-              ? 'var(--color-trading-down)'
-              : 'var(--color-hairline-on-dark)')
-          }
+          onFocus={(e) => (e.target.style.borderColor = isOverBudget ? 'var(--color-danger)' : 'rgba(255,255,255,0.4)')}
+          onBlurCapture={(e) => (e.target.style.borderColor = isOverBudget ? 'var(--color-danger)' : 'var(--color-hairline-dark)')}
         />
-        <span
-          className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium"
-          style={{ color: 'var(--color-muted)' }}
-        >
+        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--color-on-dark-mute)' }}>
           원
         </span>
       </div>
 
       {isOverBudget && (
-        <p className="text-xs mt-2" style={{ color: 'var(--color-trading-down)' }}>
+        <p className="text-xs mt-2" style={{ color: 'var(--color-danger)' }}>
           지출 후 잔액보다 목표가 높습니다
         </p>
       )}

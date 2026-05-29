@@ -18,18 +18,14 @@ function ResetButton() {
   return (
     <button
       onClick={handleReset}
-      className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md transition-colors"
+      className="flex items-center gap-1.5 text-xs px-4 py-2 rounded-full font-semibold transition-colors"
       style={{
-        color: 'var(--color-muted)',
-        backgroundColor: 'var(--color-surface-card-dark)',
-        border: '1px solid var(--color-hairline-on-dark)',
+        color: 'var(--color-on-dark-mute)',
+        backgroundColor: 'var(--color-surface-elevated)',
+        border: '1px solid var(--color-hairline-dark)',
       }}
-      onMouseEnter={(e) =>
-        (e.currentTarget.style.color = 'var(--color-trading-down)')
-      }
-      onMouseLeave={(e) =>
-        (e.currentTarget.style.color = 'var(--color-muted)')
-      }
+      onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-danger)')}
+      onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-on-dark-mute)')}
     >
       <RotateCcw size={12} />
       전체 초기화
@@ -39,31 +35,31 @@ function ResetButton() {
 
 function Calculator() {
   return (
-    <div
-      className="min-h-screen py-8 px-4"
-      style={{ backgroundColor: 'var(--color-canvas-dark)' }}
-    >
-      <div className="max-w-2xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+    <div className="min-h-screen py-10 px-4" style={{ backgroundColor: 'var(--color-canvas-dark)' }}>
+      <div className="max-w-xl mx-auto">
+        {/* Header */}
+        <div className="flex items-end justify-between mb-8">
           <div>
+            <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: 'var(--color-on-dark-mute)' }}>
+              Budget Calculator
+            </p>
             <h1
-              className="text-2xl font-bold tracking-tight"
-              style={{ color: 'var(--color-on-dark)' }}
+              className="text-4xl font-semibold leading-none"
+              style={{ color: 'var(--color-on-dark)', letterSpacing: '-0.8px' }}
             >
               월급 계산기
             </h1>
-            <p className="text-sm mt-0.5" style={{ color: 'var(--color-muted)' }}>
-              소득 · 지출 · 저축 한눈에 확인
-            </p>
           </div>
           <ResetButton />
         </div>
 
+        {/* Feedback */}
         <div className="mb-4">
           <BudgetFeedback />
         </div>
 
-        <div className="space-y-4">
+        {/* Sections */}
+        <div className="space-y-3">
           <SalaryInput />
           <ExpenseList type="fixed" />
           <ExpenseList type="variable" />
@@ -71,10 +67,7 @@ function Calculator() {
           <BudgetSummary />
         </div>
 
-        <p
-          className="text-xs text-center mt-8"
-          style={{ color: 'var(--color-muted)' }}
-        >
+        <p className="text-xs text-center mt-8" style={{ color: 'var(--color-on-dark-mute)', opacity: 0.5 }}>
           입력한 데이터는 이 기기에만 저장됩니다
         </p>
       </div>

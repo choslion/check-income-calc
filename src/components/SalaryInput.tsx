@@ -23,16 +23,10 @@ export function SalaryInput() {
   }
 
   return (
-    <div
-      className="rounded-xl p-6"
-      style={{ backgroundColor: 'var(--color-surface-card-dark)' }}
-    >
-      <h2
-        className="text-base font-semibold mb-4"
-        style={{ color: 'var(--color-on-dark)' }}
-      >
+    <div className="rounded-[20px] p-6" style={{ backgroundColor: 'var(--color-surface-elevated)' }}>
+      <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: 'var(--color-on-dark-mute)' }}>
         월 소득
-      </h2>
+      </p>
 
       <div className="relative">
         <input
@@ -42,42 +36,31 @@ export function SalaryInput() {
           onChange={handleChange}
           onBlur={handleBlur}
           placeholder="0"
-          className="w-full rounded-md px-4 py-3 pr-14 text-right font-mono text-lg outline-none transition-all"
+          className="w-full rounded-xl px-4 py-3 pr-12 text-right text-lg font-medium outline-none transition-all"
           style={{
-            backgroundColor: 'var(--color-surface-elevated-dark)',
+            backgroundColor: 'var(--color-surface-deep)',
             color: 'var(--color-on-dark)',
-            border: '1px solid var(--color-hairline-on-dark)',
-            fontFamily: 'var(--font-mono)',
+            border: '1px solid var(--color-hairline-dark)',
           }}
-          onFocus={(e) =>
-            (e.target.style.borderColor = 'var(--color-info)')
-          }
-          onBlurCapture={(e) =>
-            (e.target.style.borderColor = 'var(--color-hairline-on-dark)')
-          }
+          onFocus={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.4)')}
+          onBlurCapture={(e) => (e.target.style.borderColor = 'var(--color-hairline-dark)')}
         />
-        <span
-          className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium"
-          style={{ color: 'var(--color-muted)' }}
-        >
+        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--color-on-dark-mute)' }}>
           원
         </span>
       </div>
 
       {state.salary > 0 && (
-        <div className="mt-3 flex items-center justify-between">
-          <span
-            className="font-mono text-2xl font-bold"
-            style={{ color: 'var(--color-primary)', fontFamily: 'var(--font-mono)' }}
-          >
+        <div className="mt-4 flex items-center justify-between">
+          <span className="text-2xl font-semibold tracking-tight" style={{ color: 'var(--color-on-dark)', letterSpacing: '-0.4px' }}>
             {formatKRW(state.salary)}원
           </span>
           <button
             onClick={handleReset}
-            className="text-xs px-3 py-1 rounded-md transition-colors"
+            className="text-xs px-4 py-1.5 rounded-full transition-colors"
             style={{
-              color: 'var(--color-muted)',
-              backgroundColor: 'var(--color-surface-elevated-dark)',
+              color: 'var(--color-ink)',
+              backgroundColor: 'var(--color-canvas-light)',
             }}
           >
             초기화

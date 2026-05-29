@@ -10,15 +10,12 @@ interface Props {
 }
 
 export function ExpenseItem({ item, onUpdate, onDelete }: Props) {
-  const [amountRaw, setAmountRaw] = useState(
-    item.amount > 0 ? formatKRW(item.amount) : ''
-  )
+  const [amountRaw, setAmountRaw] = useState(item.amount > 0 ? formatKRW(item.amount) : '')
   const [nameError, setNameError] = useState(false)
 
   function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const name = e.target.value.slice(0, 30)
     setNameError(false)
-    onUpdate({ ...item, name })
+    onUpdate({ ...item, name: e.target.value.slice(0, 30) })
   }
 
   function handleNameBlur() {
@@ -36,11 +33,11 @@ export function ExpenseItem({ item, onUpdate, onDelete }: Props) {
     setAmountRaw(item.amount > 0 ? formatKRW(item.amount) : '')
   }
 
-  const inputBase = {
-    backgroundColor: 'var(--color-surface-elevated-dark)',
+  const inputStyle = {
+    backgroundColor: 'var(--color-surface-deep)',
     color: 'var(--color-on-dark)',
-    border: '1px solid var(--color-hairline-on-dark)',
-    fontFamily: 'var(--font-sans)',
+    border: '1px solid var(--color-hairline-dark)',
+    borderRadius: '0.75rem',
   }
 
   return (
@@ -53,23 +50,16 @@ export function ExpenseItem({ item, onUpdate, onDelete }: Props) {
           onBlur={handleNameBlur}
           placeholder="항목명"
           maxLength={30}
-          className="w-full rounded-md px-3 py-2.5 text-sm outline-none transition-all"
+          className="w-full px-3 py-2.5 text-sm font-medium outline-none transition-all"
           style={{
-            ...inputBase,
-            borderColor: nameError ? 'var(--color-trading-down)' : 'var(--color-hairline-on-dark)',
+            ...inputStyle,
+            borderColor: nameError ? 'var(--color-danger)' : 'var(--color-hairline-dark)',
           }}
-          onFocus={(e) => {
-            setNameError(false)
-            e.target.style.borderColor = 'var(--color-info)'
-          }}
-          onBlurCapture={(e) =>
-            (e.target.style.borderColor = nameError
-              ? 'var(--color-trading-down)'
-              : 'var(--color-hairline-on-dark)')
-          }
+          onFocus={(e) => { setNameError(false); e.target.style.borderColor = 'rgba(255,255,255,0.4)' }}
+          onBlurCapture={(e) => (e.target.style.borderColor = nameError ? 'var(--color-danger)' : 'var(--color-hairline-dark)')}
         />
         {nameError && (
-          <p className="text-xs mt-1" style={{ color: 'var(--color-trading-down)' }}>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-danger)' }}>
             항목명을 입력해주세요
           </p>
         )}
@@ -83,39 +73,22 @@ export function ExpenseItem({ item, onUpdate, onDelete }: Props) {
           onChange={handleAmountChange}
           onBlur={handleAmountBlur}
           placeholder="0"
-          className="w-full rounded-md px-3 py-2.5 pr-8 text-right text-sm outline-none transition-all"
-          style={{
-            ...inputBase,
-            fontFamily: 'var(--font-mono)',
-          }}
-          onFocus={(e) =>
-            (e.target.style.borderColor = 'var(--color-info)')
-          }
-          onBlurCapture={(e) =>
-            (e.target.style.borderColor = 'var(--color-hairline-on-dark)')
-          }
+          className="w-full px-3 py-2.5 pr-8 text-right text-sm font-medium outline-none transition-all"
+          style={inputStyle}
+          onFocus={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.4)')}
+          onBlurCapture={(e) => (e.target.style.borderColor = 'var(--color-hairline-dark)')}
         />
-        <span
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs"
-          style={{ color: 'var(--color-muted)' }}
-        >
+        <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--color-on-dark-mute)' }}>
           원
         </span>
       </div>
 
       <button
         onClick={() => onDelete(item.id)}
-        className="p-2.5 rounded-md transition-colors flex-shrink-0"
-        style={{
-          color: 'var(--color-muted)',
-          backgroundColor: 'var(--color-surface-elevated-dark)',
-        }}
-        onMouseEnter={(e) =>
-          (e.currentTarget.style.color = 'var(--color-trading-down)')
-        }
-        onMouseLeave={(e) =>
-          (e.currentTarget.style.color = 'var(--color-muted)')
-        }
+        className="p-2.5 rounded-full shrink-0 transition-colors"
+        style={{ color: 'var(--color-on-dark-mute)', backgroundColor: 'var(--color-surface-deep)' }}
+        onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-danger)')}
+        onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-on-dark-mute)')}
         aria-label="항목 삭제"
       >
         <Trash2 size={15} />

@@ -7,35 +7,34 @@ interface SummaryRowProps {
   highlight?: boolean
   danger?: boolean
   success?: boolean
-  isPercent?: boolean
   percent?: number
+  isLast?: boolean
 }
 
-function SummaryRow({ label, value, highlight, danger, success, percent }: SummaryRowProps) {
+function SummaryRow({ label, value, highlight, danger, success, percent, isLast }: SummaryRowProps) {
   const color = danger
-    ? 'var(--color-trading-down)'
+    ? 'var(--color-danger)'
     : success
-    ? 'var(--color-trading-up)'
+    ? 'var(--color-success)'
     : highlight
-    ? 'var(--color-primary)'
+    ? 'var(--color-on-dark)'
     : 'var(--color-on-dark)'
 
   return (
     <div
-      className="flex items-center justify-between py-3"
-      style={{ borderBottom: '1px solid var(--color-hairline-on-dark)' }}
+      className="flex items-center justify-between py-3.5"
+      style={{ borderBottom: isLast ? 'none' : '1px solid var(--color-hairline-dark)' }}
     >
       <div className="flex items-center gap-2">
-        <span className="text-sm" style={{ color: 'var(--color-muted)' }}>
+        <span className="text-sm" style={{ color: 'var(--color-on-dark-mute)' }}>
           {label}
         </span>
         {percent !== undefined && (
           <span
-            className="text-xs px-1.5 py-0.5 rounded"
+            className="text-xs px-2 py-0.5 rounded-full font-medium"
             style={{
-              backgroundColor: 'var(--color-surface-elevated-dark)',
-              color: 'var(--color-muted-strong)',
-              fontFamily: 'var(--font-mono)',
+              backgroundColor: 'var(--color-surface-deep)',
+              color: 'var(--color-on-dark-mute)',
             }}
           >
             {percent.toFixed(1)}%
@@ -43,8 +42,8 @@ function SummaryRow({ label, value, highlight, danger, success, percent }: Summa
         )}
       </div>
       <span
-        className="font-mono font-semibold text-sm"
-        style={{ color, fontFamily: 'var(--font-mono)' }}
+        className="text-sm font-semibold"
+        style={{ color, letterSpacing: '-0.2px' }}
       >
         {value < 0 ? '-' : ''}{formatKRW(Math.abs(value))}원
       </span>
@@ -58,53 +57,52 @@ export function BudgetSummary() {
 
   if (state.salary === 0) return null
 
-  return (
-    <div
-      className="rounded-xl p-6"
-      style={{ backgroundColor: 'var(--color-surface-card-dark)' }}
-    >
-      <h2
-        className="text-base font-semibold mb-2"
-        style={{ color: 'var(--color-on-dark)' }}
-      >
-        월간 요약
-      </h2>
+  const rows = [
+    { label: '월 소득', value: state.salary, highlight: true },
+    {
+      label: '고정 지출',
+      value: calc.totalFixed,
+      percent: state.salary > 0 ? (calc.totalFixed / state.salary) * 100 : 0,
+    },
+    {
+      label: '변동 지출',
+      value: calc.totalVariable,
+      percent: state.salary > 0 ? (calc.totalVariable / state.salary) * 100 : 0,
+    },
+    {
+      label: '총 지출',
+      value: calc.totalExpenses,
+      percent: calc.expenseRatio,
+      danger: calc.expenseRatio > 80,
+    },
+    {
+      label: '지출 후 잔액',
+      value: calc.remainingAfterExpenses,
+      danger: calc.remainingAfterExpenses < 0,
+      success: calc.remainingAfterExpenses >= 0,
+    },
+    ...(state.savingsTarget > 0
+      ? [
+          { label: '저축 목표', value: state.savingsTarget },
+          {
+            label: '저축 후 잔액',
+            value: calc.remainingAfterSavings,
+            danger: calc.remainingAfterSavings < 0,
+            success: calc.remainingAfterSavings >= 0,
+          },
+        ]
+      : []),
+  ]
 
+  return (
+    <div className="rounded-[20px] p-6" style={{ backgroundColor: 'var(--color-surface-elevated)' }}>
+      <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: 'var(--color-on-dark-mute)' }}>
+        월간 요약
+      </p>
       <div>
-        <SummaryRow label="월 소득" value={state.salary} highlight />
-        <SummaryRow
-          label="고정 지출"
-          value={calc.totalFixed}
-          percent={state.salary > 0 ? (calc.totalFixed / state.salary) * 100 : 0}
-        />
-        <SummaryRow
-          label="변동 지출"
-          value={calc.totalVariable}
-          percent={state.salary > 0 ? (calc.totalVariable / state.salary) * 100 : 0}
-        />
-        <SummaryRow
-          label="총 지출"
-          value={calc.totalExpenses}
-          percent={calc.expenseRatio}
-          danger={calc.expenseRatio > 80}
-        />
-        <SummaryRow
-          label="지출 후 잔액"
-          value={calc.remainingAfterExpenses}
-          danger={calc.remainingAfterExpenses < 0}
-          success={calc.remainingAfterExpenses > 0}
-        />
-        {state.savingsTarget > 0 && (
-          <>
-            <SummaryRow label="저축 목표" value={state.savingsTarget} />
-            <SummaryRow
-              label="저축 후 잔액"
-              value={calc.remainingAfterSavings}
-              danger={calc.remainingAfterSavings < 0}
-              success={calc.remainingAfterSavings >= 0}
-            />
-          </>
-        )}
+        {rows.map((row, i) => (
+          <SummaryRow key={row.label} {...row} isLast={i === rows.length - 1} />
+        ))}
       </div>
     </div>
   )

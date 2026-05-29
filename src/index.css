@@ -1,37 +1,40 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 @import "tailwindcss";
 
 :root {
   /* Brand */
-  --color-primary: #fcd535;
-  --color-primary-active: #f0b90b;
-  --color-primary-disabled: #3a3a1f;
+  --color-primary: #494fdf;
+  --color-primary-bright: #4f55f1;
+  --color-primary-deep: #3a40c4;
+  --color-on-primary: #ffffff;
 
   /* Canvas */
-  --color-canvas-dark: #0b0e11;
-  --color-surface-card-dark: #1e2329;
-  --color-surface-elevated-dark: #2b3139;
+  --color-canvas-dark: #000000;
+  --color-canvas-light: #ffffff;
+  --color-surface-soft: #f4f4f4;
+  --color-surface-deep: #0a0a0a;
+  --color-surface-elevated: #16181a;
 
-  /* Text */
+  /* Text on dark */
   --color-on-dark: #ffffff;
-  --color-body: #eaecef;
-  --color-muted: #707a8a;
-  --color-muted-strong: #929aa5;
-  --color-on-primary: #181a20;
+  --color-on-dark-mute: rgba(255,255,255,0.72);
+
+  /* Text on light */
+  --color-ink: #191c1f;
+  --color-muted: #505a63;
+  --color-stone: #8d969e;
 
   /* Borders */
-  --color-hairline-on-dark: #2b3139;
+  --color-hairline-dark: rgba(255,255,255,0.12);
+  --color-hairline-light: #e2e2e7;
+  --color-hairline-strong: #191c1f;
 
-  /* Trading */
-  --color-trading-up: #0ecb81;
-  --color-trading-down: #f6465d;
-
-  /* Info */
-  --color-info: #3b82f6;
+  /* Semantic */
+  --color-success: #428619;
+  --color-danger: #e23b4a;
 
   /* Fonts */
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: "IBM Plex Mono", "JetBrains Mono", ui-monospace, monospace;
 }
 
 * {
@@ -41,7 +44,7 @@
 body {
   margin: 0;
   background-color: var(--color-canvas-dark);
-  color: var(--color-body);
+  color: var(--color-on-dark);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -49,9 +52,4 @@ body {
 
 #root {
   min-height: 100svh;
-}
-
-/* 숫자 표시용 폰트 */
-.font-mono {
-  font-family: var(--font-mono);
 }
