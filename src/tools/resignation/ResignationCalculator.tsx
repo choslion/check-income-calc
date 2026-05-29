@@ -86,9 +86,6 @@ export function ResignationCalculator() {
           onChange={(v) => setState(prev => ({ ...prev, pensionType: v }))}
         />
 
-        {/* 결과: 퇴직금 + 실업급여 + 생존 기간 */}
-        <ResultSection state={state} onSurvivalChange={updateSurvival} />
-
         {/* 퇴사 사유 */}
         <ResignationReasonSelector
           value={state.resignationReason}
@@ -101,6 +98,9 @@ export function ResignationCalculator() {
           status={eligibilityStatus}
           onChange={updateChecklist}
         />
+
+        {/* 결과: 퇴직금 + 실업급여 + 생존 기간 */}
+        <ResultSection state={state} onSurvivalChange={updateSurvival} />
 
         {/* 면책 고지 */}
         <Disclaimer policyYear={policy?.year} />

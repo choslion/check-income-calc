@@ -53,8 +53,8 @@ describe('getPolicyForResignation', () => {
     expect(policy?.year).toBe(2026)
   })
 
-  it('빈 날짜 → null', () => {
-    expect(getPolicyForResignation('')).toBeNull()
+  it('빈 날짜 → 최신 연도 폴백', () => {
+    expect(getPolicyForResignation('')?.year).toBe(2026)
   })
 })
 
