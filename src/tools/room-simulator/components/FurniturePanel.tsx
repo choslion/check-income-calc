@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import type { CSSProperties } from 'react'
 import type { FurnitureItem, Room } from '../types'
-import { FurnitureSizePasteInput } from './FurnitureSizePasteInput'
+import type { SavedFurniture } from '../../../features/room-layout/saved-furniture/savedFurnitureTypes'
+import type { SavedFurnitureCategory } from '../../../features/room-layout/saved-furniture/savedFurnitureTypes'
 import {
   FURNITURE_PRESETS,
   FURNITURE_COLORS,
@@ -12,6 +13,10 @@ import {
 } from '../data/presets'
 import { getFurnitureDimensions, getWallClearance, getNearestFurnitureGap } from '../utils/geometry'
 import { formatFurnitureSize, formatDistance } from '../utils/formatters'
+import { FurnitureSizePasteInput } from './FurnitureSizePasteInput'
+import { MyFurnitureTab, SavedFurnitureEditForm } from './MyFurnitureTab'
+import { useSavedFurniture } from '../hooks/useSavedFurniture'
+import { findSimilarSavedFurniture, SAVED_CATEGORY_LABELS, SAVED_CATEGORIES, savedFurnitureToCanvasItem } from '../../../features/room-layout/saved-furniture/savedFurnitureUtils'
 
 const MIN_CLEARANCE_CM = 60
 
@@ -25,7 +30,8 @@ interface Props {
   onSelect: (id: string | null) => void
 }
 
-type PanelMode = 'list' | 'add' | 'custom'
+type AddTab = FurnitureCategory | 'my-furniture'
+type PanelMode = 'list' | 'add' | 'custom' | 'edit-saved'
 
 export function FurniturePanel({
   room,
@@ -37,17 +43,31 @@ export function FurniturePanel({
   onSelect,
 }: Props) {
   const [mode, setMode] = useState<PanelMode>('list')
-  const [activeCategory, setActiveCategory] = useState<FurnitureCategory>('bed')
+  const [activeTab, setActiveTab] = useState<AddTab>('bed')
   const [customForm, setCustomForm] = useState({ name: '', width: '', depth: '' })
   const [customErrors, setCustomErrors] = useState<Record<string, string>>({})
+  const [saveToMine, setSaveToMine] = useState(false)
+  const [savedCategory, setSavedCategory] = useState<SavedFurnitureCategory>('custom')
+  const [editingSaved, setEditingSaved] = useState<SavedFurniture | null>(null)
 
-  // 캔버스에서 가구를 선택하면 액션 버튼이 보이도록 list 모드로 전환
+  const saved = useSavedFurniture()
+
   useEffect(() => {
     if (selectedId !== null) setMode('list')
   }, [selectedId])
 
   const selectedItem = furniture.find(f => f.id === selectedId)
   const nextColor = FURNITURE_COLORS[furniture.length % FURNITURE_COLORS.length]
+
+  // Duplicate check for "내 가구에도 저장" in custom mode
+  const w = parseInt(customForm.width) || 0
+  const d = parseInt(customForm.depth) || 0
+  const saveDuplicates = saveToMine && customForm.name.trim()
+    ? findSimilarSavedFurniture(
+        { name: customForm.name.trim(), widthMm: w * 10, depthMm: d * 10 },
+        saved.list,
+      )
+    : []
 
   function handleAddPreset(preset: (typeof FURNITURE_PRESETS)[0]) {
     onAdd({
@@ -61,11 +81,20 @@ export function FurniturePanel({
     setMode('list')
   }
 
+  function handleAddFromSaved(f: SavedFurniture) {
+    const base = savedFurnitureToCanvasItem(f)
+    onAdd({
+      ...base,
+      rotated: false,
+      color: nextColor,
+      showClearance: false,
+    })
+    setMode('list')
+  }
+
   function handleAddCustom() {
     const errs: Record<string, string> = {}
     if (!customForm.name.trim()) errs.name = '이름을 입력해주세요'
-    const w = parseInt(customForm.width)
-    const d = parseInt(customForm.depth)
     if (!w || w <= 0) errs.width = '유효한 너비를 입력해주세요'
     if (!d || d <= 0) errs.depth = '유효한 깊이를 입력해주세요'
     setCustomErrors(errs)
@@ -79,9 +108,33 @@ export function FurniturePanel({
       color: nextColor,
       showClearance: false,
     })
+
+    if (saveToMine) {
+      saved.add({
+        name: customForm.name.trim(),
+        category: savedCategory,
+        widthMm: w * 10,
+        depthMm: d * 10,
+      })
+    }
+
     setCustomForm({ name: '', width: '', depth: '' })
     setCustomErrors({})
+    setSaveToMine(false)
     setMode('list')
+  }
+
+  function handleEditSaved(f: SavedFurniture) {
+    setEditingSaved(f)
+    setMode('edit-saved')
+  }
+
+  function handleSaveEdit(updates: Partial<SavedFurniture>) {
+    if (!editingSaved) return
+    saved.update(editingSaved.id, updates)
+    setEditingSaved(null)
+    setMode('add')
+    setActiveTab('my-furniture')
   }
 
   const inputStyle: CSSProperties = {
@@ -149,10 +202,7 @@ export function FurniturePanel({
             간격
           </button>
           <button
-            onClick={() => {
-              onDelete(selectedItem.id)
-              onSelect(null)
-            }}
+            onClick={() => { onDelete(selectedItem.id); onSelect(null) }}
             style={{ ...actionBtnStyle, color: 'var(--danger)', borderColor: 'transparent' }}
           >
             삭제
@@ -160,7 +210,7 @@ export function FurniturePanel({
         </div>
       )}
 
-      {/* Selected furniture detail: size + clearances + nearest gap */}
+      {/* Selected furniture detail */}
       {selectedItem && mode === 'list' && (
         <SelectedDetail room={room} item={selectedItem} furniture={furniture} />
       )}
@@ -176,7 +226,13 @@ export function FurniturePanel({
         }}
       >
         <span className="text-sm font-semibold" style={{ color: 'var(--on-dark)' }}>
-          {mode === 'list' ? `가구 목록 (${furniture.length}개)` : mode === 'add' ? '가구 선택' : '직접 입력'}
+          {mode === 'list'
+            ? `가구 목록 (${furniture.length}개)`
+            : mode === 'add'
+              ? '가구 선택'
+              : mode === 'custom'
+                ? '직접 입력'
+                : '내 가구 수정'}
         </span>
         {mode === 'list' ? (
           <button
@@ -196,7 +252,7 @@ export function FurniturePanel({
           </button>
         ) : (
           <button
-            onClick={() => setMode('list')}
+            onClick={() => { setMode('list'); setEditingSaved(null) }}
             style={{
               padding: '6px 14px',
               borderRadius: 'var(--radius-pill)',
@@ -213,10 +269,10 @@ export function FurniturePanel({
         )}
       </div>
 
-      {/* Add mode: category chips + preset grid */}
+      {/* ── Add mode: category tabs + content ── */}
       {mode === 'add' && (
         <div>
-          {/* Category chips */}
+          {/* Category chips including "내 가구" */}
           <div
             style={{
               display: 'flex',
@@ -226,16 +282,52 @@ export function FurniturePanel({
               scrollbarWidth: 'none',
             }}
           >
+            {/* 내 가구 tab */}
+            <button
+              onClick={() => setActiveTab('my-furniture')}
+              style={{
+                padding: '5px 13px',
+                borderRadius: 'var(--radius-pill)',
+                border: `1px solid ${activeTab === 'my-furniture' ? 'var(--primary)' : 'var(--hairline)'}`,
+                backgroundColor: activeTab === 'my-furniture' ? 'var(--primary)' : 'var(--surface-input)',
+                color: activeTab === 'my-furniture' ? 'var(--on-primary)' : 'var(--on-dark-mute)',
+                fontSize: '13px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+              }}
+            >
+              ⭐ 내 가구
+              {saved.list.length > 0 && (
+                <span
+                  style={{
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    backgroundColor: activeTab === 'my-furniture' ? 'rgba(0,0,0,0.15)' : 'var(--surface-card)',
+                    borderRadius: 9999,
+                    padding: '1px 5px',
+                  }}
+                >
+                  {saved.list.length}
+                </span>
+              )}
+            </button>
+
+            {/* Preset categories */}
             {FURNITURE_CATEGORIES.map(cat => (
               <button
                 key={cat}
-                onClick={() => setActiveCategory(cat)}
+                onClick={() => setActiveTab(cat)}
                 style={{
                   padding: '5px 13px',
                   borderRadius: 'var(--radius-pill)',
-                  border: `1px solid ${activeCategory === cat ? 'var(--primary)' : 'var(--hairline)'}`,
-                  backgroundColor: activeCategory === cat ? 'var(--primary)' : 'var(--surface-input)',
-                  color: activeCategory === cat ? 'var(--on-primary)' : 'var(--on-dark-mute)',
+                  border: `1px solid ${activeTab === cat ? 'var(--primary)' : 'var(--hairline)'}`,
+                  backgroundColor: activeTab === cat ? 'var(--primary)' : 'var(--surface-input)',
+                  color: activeTab === cat ? 'var(--on-primary)' : 'var(--on-dark-mute)',
                   fontSize: '13px',
                   fontWeight: 600,
                   cursor: 'pointer',
@@ -248,60 +340,75 @@ export function FurniturePanel({
             ))}
           </div>
 
-          {/* Preset grid */}
-          <div style={{ padding: '0 16px 16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            {getFurniturePresetsByCategory(activeCategory).map(preset => (
+          {/* My furniture tab content */}
+          {activeTab === 'my-furniture' && (
+            <MyFurnitureTab
+              list={saved.list}
+              onAddToCanvas={handleAddFromSaved}
+              onEditRequest={handleEditSaved}
+              onDelete={saved.remove}
+              onClearAll={saved.clear}
+              inputStyle={inputStyle}
+            />
+          )}
+
+          {/* Preset grid for regular categories */}
+          {activeTab !== 'my-furniture' && (
+            <div style={{ padding: '0 16px 16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              {getFurniturePresetsByCategory(activeTab).map(preset => (
+                <button
+                  key={preset.id}
+                  onClick={() => handleAddPreset(preset)}
+                  style={{
+                    padding: '10px 12px',
+                    border: '1px solid var(--hairline)',
+                    borderRadius: 8,
+                    backgroundColor: 'var(--surface-input)',
+                    color: 'var(--on-dark)',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <div style={{ fontSize: '13px', fontWeight: 600 }}>{preset.name}</div>
+                  <div
+                    style={{
+                      fontSize: '11px',
+                      marginTop: 2,
+                      color: 'var(--muted)',
+                      fontFamily: 'var(--font-number)',
+                    }}
+                  >
+                    {preset.width} × {preset.depth}cm
+                  </div>
+                </button>
+              ))}
               <button
-                key={preset.id}
-                onClick={() => handleAddPreset(preset)}
+                onClick={() => setMode('custom')}
                 style={{
                   padding: '10px 12px',
-                  border: '1px solid var(--hairline)',
+                  border: '1px dashed var(--hairline)',
                   borderRadius: 8,
-                  backgroundColor: 'var(--surface-input)',
-                  color: 'var(--on-dark)',
+                  backgroundColor: 'transparent',
+                  color: 'var(--on-dark-mute)',
                   textAlign: 'left',
                   cursor: 'pointer',
                 }}
               >
-                <div style={{ fontSize: '13px', fontWeight: 600 }}>{preset.name}</div>
-                <div
-                  style={{
-                    fontSize: '11px',
-                    marginTop: 2,
-                    color: 'var(--muted)',
-                    fontFamily: 'var(--font-number)',
-                  }}
-                >
-                  {preset.width} × {preset.depth}cm
+                <div style={{ fontSize: '13px', fontWeight: 600 }}>직접 입력</div>
+                <div style={{ fontSize: '11px', marginTop: 2, color: 'var(--muted)' }}>
+                  원하는 크기로
                 </div>
               </button>
-            ))}
-            <button
-              onClick={() => setMode('custom')}
-              style={{
-                padding: '10px 12px',
-                border: '1px dashed var(--hairline)',
-                borderRadius: 8,
-                backgroundColor: 'transparent',
-                color: 'var(--on-dark-mute)',
-                textAlign: 'left',
-                cursor: 'pointer',
-              }}
-            >
-              <div style={{ fontSize: '13px', fontWeight: 600 }}>직접 입력</div>
-              <div style={{ fontSize: '11px', marginTop: 2, color: 'var(--muted)' }}>
-                원하는 크기로
-              </div>
-            </button>
-          </div>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Custom mode */}
+      {/* ── Custom mode ── */}
       {mode === 'custom' && (
         <div style={{ padding: '12px 16px 16px' }}>
           <div className="space-y-3">
+            {/* Name */}
             <div>
               <label className="block text-xs mb-1.5" style={{ color: 'var(--on-dark-mute)' }}>
                 가구 이름
@@ -322,6 +429,7 @@ export function FurniturePanel({
                 </p>
               )}
             </div>
+
             {/* Size paste input */}
             <FurnitureSizePasteInput
               onApply={(w, d) =>
@@ -329,6 +437,7 @@ export function FurniturePanel({
               }
             />
 
+            {/* Width / Depth */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs mb-1.5" style={{ color: 'var(--on-dark-mute)' }}>
@@ -373,10 +482,75 @@ export function FurniturePanel({
                 )}
               </div>
             </div>
+
             {/* Dimension guidance */}
             <p style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: 1.5 }}>
               상품 페이지의 너비(W)와 깊이(D) 값을 입력하세요. 높이(H)는 2D 평면도에 사용하지 않아요.
             </p>
+
+            {/* Save to My Furniture checkbox */}
+            <div
+              style={{
+                padding: '10px 12px',
+                backgroundColor: saveToMine ? 'rgba(var(--primary-rgb,247,208,79),0.06)' : 'var(--surface-input)',
+                border: `1px solid ${saveToMine ? 'var(--primary)' : 'var(--hairline)'}`,
+                borderRadius: 8,
+              }}
+            >
+              <label
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  cursor: 'pointer',
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={saveToMine}
+                  onChange={e => setSaveToMine(e.target.checked)}
+                  style={{ width: 14, height: 14, cursor: 'pointer', accentColor: 'var(--primary)' }}
+                />
+                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--on-dark)' }}>
+                  내 가구에도 저장
+                </span>
+              </label>
+
+              {/* Category selector (shown when checkbox is checked) */}
+              {saveToMine && (
+                <div style={{ marginTop: 10 }}>
+                  <p className="text-xs mb-1.5" style={{ color: 'var(--on-dark-mute)' }}>카테고리</p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                    {SAVED_CATEGORIES.map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => setSavedCategory(cat)}
+                        style={{
+                          padding: '3px 9px',
+                          borderRadius: 'var(--radius-pill)',
+                          border: `1px solid ${savedCategory === cat ? 'var(--primary)' : 'var(--hairline)'}`,
+                          backgroundColor: savedCategory === cat ? 'var(--primary)' : 'transparent',
+                          color: savedCategory === cat ? 'var(--on-primary)' : 'var(--on-dark-mute)',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {SAVED_CATEGORY_LABELS[cat]}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Duplicate warning */}
+                  {saveDuplicates.length > 0 && (
+                    <p className="text-xs mt-2" style={{ color: '#f7d04f' }}>
+                      ⚠ 비슷한 가구가 이미 있어요: {saveDuplicates.map(f => f.name).join(', ')}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
             <button
               onClick={handleAddCustom}
               style={{
@@ -397,7 +571,18 @@ export function FurniturePanel({
         </div>
       )}
 
-      {/* Furniture list */}
+      {/* ── Edit saved furniture mode ── */}
+      {mode === 'edit-saved' && editingSaved && (
+        <SavedFurnitureEditForm
+          f={editingSaved}
+          list={saved.list}
+          onSave={handleSaveEdit}
+          onCancel={() => { setMode('add'); setActiveTab('my-furniture'); setEditingSaved(null) }}
+          inputStyle={inputStyle}
+        />
+      )}
+
+      {/* ── Furniture list ── */}
       {mode === 'list' && (
         <div>
           {furniture.length === 0 ? (
@@ -496,7 +681,7 @@ const actionBtnStyle: CSSProperties = {
   flexShrink: 0,
 }
 
-// ─── Selected Detail Panel ────────────────────────────────────────────────
+// ─── Selected Detail Panel ─────────────────────────────────────────────────────
 
 interface SelectedDetailProps {
   room: Room
@@ -530,7 +715,6 @@ function SelectedDetail({ room, item, furniture }: SelectedDetailProps) {
         backgroundColor: 'rgba(0,0,0,0.12)',
       }}
     >
-      {/* Size label */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
         <span
           style={{
@@ -549,7 +733,6 @@ function SelectedDetail({ room, item, furniture }: SelectedDetailProps) {
         </span>
       </div>
 
-      {/* Wall clearances */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 4, marginBottom: nearest ? 8 : 0 }}>
         {(
           [
@@ -584,7 +767,6 @@ function SelectedDetail({ room, item, furniture }: SelectedDetailProps) {
         ))}
       </div>
 
-      {/* Nearest furniture gap */}
       {nearest && nearest.gap > 0 && (
         <div
           style={{
@@ -616,7 +798,6 @@ function SelectedDetail({ room, item, furniture }: SelectedDetailProps) {
         </div>
       )}
 
-      {/* Advisory warning */}
       {(anyWallWarning || nearestWarning) && (
         <p style={{ fontSize: '11px', color: '#f7d04f', marginTop: 6, lineHeight: 1.4 }}>
           ⚠ 60cm 미만 통로가 있어요. 실제 생활에서 좁게 느껴질 수 있어요.
