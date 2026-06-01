@@ -1,9 +1,12 @@
-import type { Room, FurnitureItem } from '../types'
+import type { Room, FurnitureItem, FixedElement } from '../types'
 import {
   getFurnitureDimensions,
   getOccupancyPercent,
   getOccupancyStatus,
   checkClearances,
+  checkFixedElementConflicts,
+  getDoorClearanceZone,
+  FIXED_ELEMENT_COLORS,
 } from './geometry'
 
 export { canUseNativeShare, getExportFileName } from '../../../features/room-layout/export/exportLayoutImage'
@@ -20,14 +23,17 @@ const DPR = 2  // retina
 export async function createLayoutBlob(
   room: Room,
   furniture: FurnitureItem[],
+  fixedElements: FixedElement[] = [],
+  layoutVersionName?: string,
 ): Promise<Blob> {
   const pct = getOccupancyPercent(room, furniture)
   const status = getOccupancyStatus(pct)
-  const warnings = checkClearances(room, furniture)
-  // Priority: overlap > clearance
+  const fixedWarnings = checkFixedElementConflicts(furniture, fixedElements)
+  const clearanceWarnings = checkClearances(room, furniture)
+  const allWarnings = [...fixedWarnings, ...clearanceWarnings]
   const mainWarning =
-    warnings.find(w => w.id.includes('overlap')) ??
-    warnings[0] ??
+    allWarnings.find(w => w.id.includes('overlap')) ??
+    allWarnings[0] ??
     null
 
   // Scale room to fit CONTENT_W × MAX_CANVAS_H
@@ -60,7 +66,10 @@ export async function createLayoutBlob(
 
   ctx.fillStyle = '#ffffff'
   ctx.font = '700 18px Inter, -apple-system, sans-serif'
-  ctx.fillText('방 가구 배치 시뮬레이터', PADDING, y)
+  const headerTitle = layoutVersionName
+    ? `방 가구 배치 · ${layoutVersionName}`
+    : '방 가구 배치 시뮬레이터'
+  ctx.fillText(headerTitle, PADDING, y)
 
   ctx.fillStyle = 'rgba(255,255,255,0.35)'
   ctx.font = '400 12px Inter, sans-serif'
@@ -93,6 +102,63 @@ export async function createLayoutBlob(
     ctx.moveTo(canvasX, y + gy * s)
     ctx.lineTo(canvasX + canvasW, y + gy * s)
     ctx.stroke()
+  }
+
+  // Fixed elements
+  for (const el of fixedElements) {
+    const color = FIXED_ELEMENT_COLORS[el.type]
+    const ex = canvasX + el.xCm * s
+    const ey = y + el.yCm * s
+    const ew = el.widthCm * s
+    const eh = el.depthCm * s
+    const isWall = !!el.wallSide
+
+    // Clearance zone
+    const zone = getDoorClearanceZone(el)
+    if (zone) {
+      ctx.fillStyle = color + '20'
+      ctx.fillRect(canvasX + zone.x * s, y + zone.y * s, zone.w * s, zone.h * s)
+      ctx.setLineDash([4, 3])
+      ctx.strokeStyle = color + '55'
+      ctx.lineWidth = 1
+      ctx.strokeRect(canvasX + zone.x * s, y + zone.y * s, zone.w * s, zone.h * s)
+      ctx.setLineDash([])
+    }
+
+    // Element fill
+    if (isWall) {
+      ctx.fillStyle = color + 'cc'
+    } else {
+      ctx.fillStyle = color + '33'
+      // Diagonal hatching
+      ctx.save()
+      ctx.beginPath()
+      ctx.rect(ex, ey, ew, eh)
+      ctx.clip()
+      ctx.strokeStyle = color + '44'
+      ctx.lineWidth = 1
+      for (let d = -eh; d < ew + eh; d += 8) {
+        ctx.beginPath()
+        ctx.moveTo(ex + d, ey)
+        ctx.lineTo(ex + d + eh, ey + eh)
+        ctx.stroke()
+      }
+      ctx.restore()
+    }
+    ctx.fillRect(ex, ey, ew, eh)
+    ctx.strokeStyle = color
+    ctx.lineWidth = 2
+    ctx.strokeRect(ex, ey, ew, eh)
+
+    // Label
+    if (ew > 20 && eh > 10) {
+      const labelPx = Math.min(10, Math.max(7, Math.min(ew, eh) / 2))
+      ctx.fillStyle = isWall ? '#ffffff' : color
+      ctx.font = `600 ${labelPx}px Inter, sans-serif`
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(el.name, ex + ew / 2, ey + eh / 2, ew - 4)
+    }
   }
 
   // Furniture

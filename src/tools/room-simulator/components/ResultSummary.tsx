@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import type { Room, FurnitureItem } from '../types'
+import { ChevronLeft } from 'lucide-react'
+import type { Room, FurnitureItem, FixedElement } from '../types'
 import {
   getRoomArea,
   getFurnitureArea,
   getOccupancyPercent,
   getOccupancyStatus,
   checkClearances,
+  checkFixedElementConflicts,
   getFurnitureDimensions,
 } from '../utils/geometry'
 import { createLayoutBlob, shareOrDownload, canUseNativeShare, getExportFileName } from '../utils/export'
@@ -13,14 +15,18 @@ import { createLayoutBlob, shareOrDownload, canUseNativeShare, getExportFileName
 interface Props {
   room: Room
   furniture: FurnitureItem[]
+  fixedElements: FixedElement[]
+  layoutVersionName?: string
   onReset: () => void
   onBack: () => void
 }
 
-export function ResultSummary({ room, furniture, onReset, onBack }: Props) {
+export function ResultSummary({ room, furniture, fixedElements, layoutVersionName, onReset, onBack }: Props) {
   const totalPct = getOccupancyPercent(room, furniture)
   const status = getOccupancyStatus(totalPct)
-  const warnings = checkClearances(room, furniture)
+  const fixedWarnings = checkFixedElementConflicts(furniture, fixedElements)
+  const clearanceWarnings = checkClearances(room, furniture)
+  const warnings = [...fixedWarnings, ...clearanceWarnings]
   const roomArea = getRoomArea(room)
 
   const [isExporting, setIsExporting] = useState(false)
@@ -33,7 +39,7 @@ export function ResultSummary({ room, furniture, onReset, onBack }: Props) {
     setIsExporting(true)
     setExportError(null)
     try {
-      const blob = await createLayoutBlob(room, furniture)
+      const blob = await createLayoutBlob(room, furniture, fixedElements, layoutVersionName)
       await shareOrDownload(blob, getExportFileName())
     } catch {
       setExportError('이미지를 생성하지 못했습니다. 다시 시도해 주세요.')
@@ -303,7 +309,7 @@ export function ResultSummary({ room, furniture, onReset, onBack }: Props) {
             cursor: 'pointer',
           }}
         >
-          ← 수정하기
+          <ChevronLeft size={15} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 2 }} />수정하기
         </button>
         <button
           onClick={handleExport}

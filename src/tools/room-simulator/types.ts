@@ -22,4 +22,50 @@ export interface ClearanceWarning {
   message: string
 }
 
+export type FixedElementType =
+  | 'door'
+  | 'window'
+  | 'builtInCloset'
+  | 'balconyDoor'
+  | 'column'
+  | 'unavailableArea'
+
+export type WallSide = 'top' | 'right' | 'bottom' | 'left'
+
+export interface FixedElement {
+  id: string
+  type: FixedElementType
+  name: string
+  xCm: number      // top-left corner in room coordinates
+  yCm: number
+  widthCm: number  // horizontal dimension
+  depthCm: number  // vertical dimension
+  wallSide?: WallSide
+}
+
 export type Step = 'room' | 'furniture' | 'result'
+
+export interface LayoutVersion {
+  id: string
+  name: string
+  room: Room
+  furnitureList: FurnitureItem[]
+  fixedElements: FixedElement[]
+  createdAt: string
+  updatedAt: string
+}
+
+export interface LayoutVersionSummary {
+  layoutVersionId: string
+  name: string
+  occupancyPercent: number
+  status: { label: string; sublabel: string; color: string }
+  furnitureCount: number
+  warningCount: number
+  overlapWarningCount: number
+  fixedElementConflictCount: number
+  minimumClearanceCm: number | null
+  mainWarning: ClearanceWarning | null
+  isRecommended: boolean
+  recommendedReason: string | null
+}

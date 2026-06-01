@@ -1,9 +1,11 @@
 import { useRef, useEffect, useState } from 'react'
-import type { Room, FurnitureItem } from '../types'
+import type { Room, FurnitureItem, FixedElement } from '../types'
 import {
   getFurnitureDimensions,
   getWallClearance,
   getNearestFurnitureGap,
+  getDoorClearanceZone,
+  FIXED_ELEMENT_COLORS,
 } from '../utils/geometry'
 import { formatFurnitureSize, formatDistance } from '../utils/formatters'
 
@@ -18,6 +20,8 @@ interface Props {
   onMove: (id: string, x: number, y: number) => void
   showAllClearance: boolean
   readonly?: boolean
+  fixedElements?: FixedElement[]
+  onFixedMove?: (id: string, xCm: number, yCm: number) => void
 }
 
 export function RoomCanvas({
@@ -28,6 +32,8 @@ export function RoomCanvas({
   onMove,
   showAllClearance,
   readonly = false,
+  fixedElements = [],
+  onFixedMove,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerWidth, setContainerWidth] = useState(320)
@@ -113,6 +119,18 @@ export function RoomCanvas({
       >
         {room.width}×{room.height}cm
       </div>
+
+      {/* Fixed elements */}
+      {fixedElements.map(el => (
+        <FixedElementRect
+          key={el.id}
+          el={el}
+          scale={scale}
+          room={room}
+          readonly={readonly}
+          onMove={onFixedMove}
+        />
+      ))}
 
       {/* Furniture items */}
       {furniture.map(item => (
@@ -364,6 +382,141 @@ function FurnitureGapLine({ selected, nearest, scale }: FurnitureGapLineProps) {
       isWarning={isWarning}
       orientation={orientation}
     />
+  )
+}
+
+// ─── FixedElementRect ────────────────────────────────────────────────────────
+
+interface FixedElementRectProps {
+  el: FixedElement
+  scale: number
+  room: Room
+  readonly: boolean
+  onMove?: (id: string, xCm: number, yCm: number) => void
+}
+
+function FixedElementRect({ el, scale, room, readonly, onMove }: FixedElementRectProps) {
+  const color = FIXED_ELEMENT_COLORS[el.type]
+  const isWall = !!el.wallSide
+  const clearanceZone = getDoorClearanceZone(el)
+  const draggable = !readonly && !!onMove
+
+  const dragRef = useRef<{
+    startPointerX: number
+    startPointerY: number
+    startXCm: number
+    startYCm: number
+  } | null>(null)
+
+  function handlePointerDown(e: React.PointerEvent) {
+    if (!draggable) return
+    e.stopPropagation()
+    e.preventDefault()
+    ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+    dragRef.current = {
+      startPointerX: e.clientX,
+      startPointerY: e.clientY,
+      startXCm: el.xCm,
+      startYCm: el.yCm,
+    }
+  }
+
+  function handlePointerMove(e: React.PointerEvent) {
+    if (!dragRef.current || !onMove) return
+    const dx = (e.clientX - dragRef.current.startPointerX) / scale
+    const dy = (e.clientY - dragRef.current.startPointerY) / scale
+    let newX = dragRef.current.startXCm + dx
+    let newY = dragRef.current.startYCm + dy
+
+    if (el.wallSide === 'top' || el.wallSide === 'bottom') {
+      newX = Math.max(0, Math.min(room.width - el.widthCm, newX))
+      newY = dragRef.current.startYCm
+    } else if (el.wallSide === 'left' || el.wallSide === 'right') {
+      newX = dragRef.current.startXCm
+      newY = Math.max(0, Math.min(room.height - el.depthCm, newY))
+    } else {
+      newX = Math.max(0, Math.min(room.width - el.widthCm, newX))
+      newY = Math.max(0, Math.min(room.height - el.depthCm, newY))
+    }
+    onMove(el.id, newX, newY)
+  }
+
+  function handlePointerUp() {
+    dragRef.current = null
+  }
+
+  const pxW = el.widthCm * scale
+  const pxH = el.depthCm * scale
+  const showLabel = pxW > 24 && pxH > 14
+
+  return (
+    <>
+      {/* Door clearance zone */}
+      {clearanceZone && (
+        <div
+          style={{
+            position: 'absolute',
+            left: clearanceZone.x * scale,
+            top: clearanceZone.y * scale,
+            width: clearanceZone.w * scale,
+            height: clearanceZone.h * scale,
+            backgroundColor: color + '18',
+            border: `1px dashed ${color}55`,
+            pointerEvents: 'none',
+            zIndex: 1,
+          }}
+        />
+      )}
+
+      {/* Element body */}
+      <div
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onClick={e => e.stopPropagation()}
+        style={{
+          position: 'absolute',
+          left: el.xCm * scale,
+          top: el.yCm * scale,
+          width: pxW,
+          height: pxH,
+          backgroundColor: isWall ? color + 'cc' : color + '30',
+          backgroundImage: isWall
+            ? 'none'
+            : `repeating-linear-gradient(45deg, ${color}28 0, ${color}28 3px, transparent 3px, transparent 9px)`,
+          border: `2px solid ${color}`,
+          cursor: draggable ? 'grab' : 'default',
+          zIndex: 2,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+          touchAction: 'none',
+          borderRadius: isWall ? 2 : 3,
+        }}
+      >
+        {showLabel && (
+          <span
+            style={{
+              fontSize: Math.min(11, Math.max(7, Math.min(pxW, pxH) / 2.5)),
+              color: isWall ? '#fff' : color,
+              fontWeight: 700,
+              textAlign: 'center',
+              pointerEvents: 'none',
+              userSelect: 'none',
+              textShadow: isWall ? '0 1px 3px rgba(0,0,0,0.9)' : 'none',
+              maxWidth: '100%',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              padding: '0 2px',
+            }}
+          >
+            {el.name}
+          </span>
+        )}
+      </div>
+    </>
   )
 }
 
