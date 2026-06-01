@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
+import { ChevronRight } from 'lucide-react'
 import type { Room, Unit } from '../types'
 import { ROOM_PRESETS } from '../data/presets'
 
@@ -248,7 +249,7 @@ export function RoomSetup({ room, onRoomChange, onNext }: Props) {
           cursor: 'pointer',
         }}
       >
-        가구 배치하기 →
+        가구 배치하기 <ChevronRight size={16} style={{ display: 'inline', verticalAlign: 'middle' }} />
       </button>
     </div>
   )
