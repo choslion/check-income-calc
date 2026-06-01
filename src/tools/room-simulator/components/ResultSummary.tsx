@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Room, FurnitureItem } from '../types'
 import {
   getRoomArea,
@@ -5,9 +6,9 @@ import {
   getOccupancyPercent,
   getOccupancyStatus,
   checkClearances,
-  exportRoomAsImage,
   getFurnitureDimensions,
 } from '../utils/geometry'
+import { createLayoutBlob, shareOrDownload, canUseNativeShare, getExportFileName } from '../utils/export'
 
 interface Props {
   room: Room
@@ -21,6 +22,25 @@ export function ResultSummary({ room, furniture, onReset, onBack }: Props) {
   const status = getOccupancyStatus(totalPct)
   const warnings = checkClearances(room, furniture)
   const roomArea = getRoomArea(room)
+
+  const [isExporting, setIsExporting] = useState(false)
+  const [exportError, setExportError] = useState<string | null>(null)
+
+  const supportsShare = canUseNativeShare()
+
+  async function handleExport() {
+    if (isExporting || furniture.length === 0) return
+    setIsExporting(true)
+    setExportError(null)
+    try {
+      const blob = await createLayoutBlob(room, furniture)
+      await shareOrDownload(blob, getExportFileName())
+    } catch {
+      setExportError('이미지를 생성하지 못했습니다. 다시 시도해 주세요.')
+    } finally {
+      setIsExporting(false)
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -286,23 +306,31 @@ export function ResultSummary({ room, furniture, onReset, onBack }: Props) {
           ← 수정하기
         </button>
         <button
-          onClick={() => exportRoomAsImage(room, furniture)}
-          disabled={furniture.length === 0}
+          onClick={handleExport}
+          disabled={furniture.length === 0 || isExporting}
           style={{
             flex: 1,
             padding: '13px',
             borderRadius: 'var(--radius-button)',
             border: 'none',
-            backgroundColor: furniture.length === 0 ? 'var(--surface-card)' : 'var(--primary)',
-            color: furniture.length === 0 ? 'var(--muted)' : 'var(--on-primary)',
+            backgroundColor: furniture.length === 0 || isExporting ? 'var(--surface-card)' : 'var(--primary)',
+            color: furniture.length === 0 || isExporting ? 'var(--muted)' : 'var(--on-primary)',
             fontWeight: 700,
             fontSize: '15px',
-            cursor: furniture.length === 0 ? 'not-allowed' : 'pointer',
+            cursor: furniture.length === 0 || isExporting ? 'not-allowed' : 'pointer',
           }}
         >
-          이미지 저장
+          {isExporting ? '이미지 생성 중...' : supportsShare ? '공유하기' : '이미지 저장'}
         </button>
       </div>
+      {exportError && (
+        <p
+          className="text-sm text-center"
+          style={{ color: '#f76f6f', marginTop: -8 }}
+        >
+          {exportError}
+        </p>
+      )}
       <button
         onClick={onReset}
         style={{
