@@ -7,13 +7,13 @@ export interface RoomPreset {
 }
 
 export const ROOM_PRESETS: RoomPreset[] = [
-  { id: 'one-room-5p', label: '5평 원룸 예시', width: 260, height: 300, description: '작은 원룸 예시예요' },
-  { id: 'one-room-6p', label: '6평 원룸 예시', width: 300, height: 330, description: '소형 원룸 일반 예시예요' },
-  { id: 'one-room-7p', label: '7평 원룸 예시', width: 320, height: 360, description: '조금 넓은 원룸 예시예요' },
-  { id: 'one-room-8p', label: '8평 원룸 예시', width: 350, height: 380, description: '넉넉한 원룸 예시예요' },
-  { id: 'bedroom', label: '작은 침실 예시', width: 300, height: 320, description: '소형 침실 레이아웃 예시예요' },
-  { id: 'newlywed', label: '신혼 침실 예시', width: 340, height: 380, description: '퀸 침대·옷장 배치 예시예요' },
-  { id: 'living', label: '작은 거실 예시', width: 360, height: 420, description: '소파·TV장 배치 예시예요' },
+  { id: 'one-room-5p', label: '5평 원룸 예시', width: 360, height: 460, description: '약 16.6m² · 작은 원룸 예시예요' },
+  { id: 'one-room-6p', label: '6평 원룸 예시', width: 400, height: 500, description: '약 20m² · 소형 원룸 일반 예시예요' },
+  { id: 'one-room-7p', label: '7평 원룸 예시', width: 420, height: 550, description: '약 23m² · 조금 넓은 원룸 예시예요' },
+  { id: 'one-room-8p', label: '8평 원룸 예시', width: 450, height: 590, description: '약 26.6m² · 넉넉한 원룸 예시예요' },
+  { id: 'bedroom', label: '작은 침실 예시', width: 300, height: 340, description: '소형 침실 레이아웃 예시예요' },
+  { id: 'newlywed', label: '신혼 침실 예시', width: 360, height: 420, description: '퀸 침대·옷장 배치 예시예요' },
+  { id: 'living', label: '작은 거실 예시', width: 400, height: 500, description: '소파·TV장 배치 예시예요' },
 ]
 
 export type FurnitureCategory = 'bed' | 'desk' | 'table' | 'sofa' | 'storage' | 'living' | 'bedroom'
