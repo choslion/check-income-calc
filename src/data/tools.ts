@@ -36,6 +36,14 @@ export const TOOLS: Tool[] = [
     status: 'available',
   },
   {
+    id: 'room-simulator',
+    title: '방 가구 시뮬레이터',
+    description: '방 크기와 가구를 입력하고 실제 비율로 배치해 공간 점유율을 확인하세요.',
+    path: '/tools/room-simulator',
+    category: 'utility',
+    status: 'available',
+  },
+  {
     id: 'subscription',
     title: '구독 계산기',
     description: '매달 나가는 구독료를 한눈에 정리하고 연간 비용을 확인하세요.',
