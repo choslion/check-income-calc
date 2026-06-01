@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { CSSProperties } from 'react'
 import type { FurnitureItem, Room } from '../types'
+import { FurnitureSizePasteInput } from './FurnitureSizePasteInput'
 import {
   FURNITURE_PRESETS,
   FURNITURE_COLORS,
@@ -321,6 +322,13 @@ export function FurniturePanel({
                 </p>
               )}
             </div>
+            {/* Size paste input */}
+            <FurnitureSizePasteInput
+              onApply={(w, d) =>
+                setCustomForm(p => ({ ...p, width: String(w), depth: String(d) }))
+              }
+            />
+
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs mb-1.5" style={{ color: 'var(--on-dark-mute)' }}>
