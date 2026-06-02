@@ -8,10 +8,11 @@ export interface Room {
 export interface FurnitureItem {
   id: string
   name: string
-  width: number  // cm (physical width)
-  depth: number  // cm (physical depth)
-  x: number      // cm from room left
-  y: number      // cm from room top
+  width: number    // cm (physical width)
+  depth: number    // cm (physical depth)
+  heightCm?: number // cm (physical height, optional — used for 3D preview)
+  x: number        // cm from room left
+  y: number        // cm from room top
   rotated: boolean
   color: string
   showClearance: boolean

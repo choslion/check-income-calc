@@ -7,36 +7,37 @@ or major implementation decisions. Also update it before context compaction if p
 
 ## Latest Working Summary
 
-- **Date:** 2026-06-01
-- **Main task:** Room simulator — layout version compare + fixed element labels/rename
+- **Date:** 2026-06-02
+- **Main task:** Room simulator — 3D preview mode
 - **Files changed:**
-  - `src/tools/room-simulator/types.ts` — added `LayoutVersion`, `LayoutVersionSummary` types
-  - `src/tools/room-simulator/utils/geometry.ts` — added `getMinimumClearanceCm`
-  - `src/tools/room-simulator/utils/versions.ts` — NEW: `createLayoutVersion`, `duplicateLayoutVersion`, `getVersionName`, `generateId`, `getLayoutVersionSummaries`
-  - `src/tools/room-simulator/components/VersionTabs.tsx` — NEW: horizontal scrollable tab switcher with rename/duplicate/delete actions
-  - `src/tools/room-simulator/components/CompareView.tsx` — NEW: 2-column compare cards with mini preview (CSS divs, no canvas), occupancy/clearance/warning stats, recommendation badge
-  - `src/tools/room-simulator/components/FixedElementPanel.tsx` — added `onRename` prop + inline text editing for element names
-  - `src/tools/room-simulator/RoomSimulatorTool.tsx` — replaced `room/furniture/fixedElements` state with `SimState { versions, activeVersionId }`, added all version management handlers, added VersionTabs and compare mode toggle
-  - `src/tools/room-simulator/utils/export.ts` — added `layoutVersionName` param; header shows "방 가구 배치 · A안" when name present
-  - `src/tools/room-simulator/components/ResultSummary.tsx` — added `layoutVersionName` prop, passed to `createLayoutBlob`
+  - `src/tools/room-simulator/types.ts` — added `heightCm?: number` to `FurnitureItem` (optional, used for 3D height)
+  - `src/tools/room-simulator/utils/furniture3dDefaults.ts` — NEW: `getFurnitureHeightCm()` keyword-based height lookup (침대→45, 책상→72, 소파→80, 옷장→200, etc; fallback 70cm)
+  - `src/tools/room-simulator/components/ThreePreview.tsx` — NEW: full 3D block preview using `@react-three/fiber` + `@react-three/drei`; room floor + semi-transparent walls, furniture as colored boxes, fixed elements as type-colored boxes, camera preset buttons (사선/위/정면), OrbitControls
+  - `src/tools/room-simulator/RoomSimulatorTool.tsx` — added `show3D` state; `ViewToggle` helper component; 2D/3D toggle row in step 2 (above canvas, only when furniture exists) and step 3 (always shown); `handleReset` resets `show3D` to false
+  - `package.json` — added `three`, `@react-three/fiber`, `@react-three/drei`; `@types/three` in devDependencies
 - **Key decisions:**
-  - Version state is `{ versions: LayoutVersion[], activeVersionId: string }` combined in one `useState` to avoid bootstrap ID mismatch between two separate states.
-  - `patchActive(updates)` helper mutates the active version; uses functional update so React batching is safe.
-  - CompareView uses `MiniRoomPreview` (plain divs, not `RoomCanvas`) to avoid ResizeObserver and pointer-event overhead inside comparison cards.
-  - Fixed element labels on canvas were already implemented in `RoomCanvas.tsx` (`FixedElementRect` renders `{el.name}` when `pxW > 24 && pxH > 14`).
-  - Recommendation score = `overlapWarnings*1000 + fixedConflicts*200 + warnings*10 + occupancy% − minClearance*0.5`; no recommendation shown when only 1 version.
-- **Current issue:** None. `npx tsc --noEmit` passes clean.
-- **Next steps:** Verify compare view and version tabs visually on mobile.
+  - 3D preview is read-only: no furniture editing inside the 3D scene; user must return to 2D for edits.
+  - Heights use keyword matching against furniture name (not a new UI input field), keeping the feature additive without complicating FurniturePanel.
+  - Fixed elements use their 2D footprint + a type-specific height and color; wall-mounted elements (door, window) are rendered at their 2D floor position — sufficient for spatial understanding.
+  - 1 Three.js unit = 100cm; coordinate mapping: 2D x→3D X, 2D y→3D Z, height→3D Y.
+  - Camera presets: '사선' (isometric default), '위' (top-down), '정면' (front); CameraRig component watches preset and room size changes and repositions camera + OrbitControls target.
+  - `show3D` toggle in step 2 only appears when `furniture.length > 0` (no empty-room 3D view).
+  - In step 2, 3D preview replaces only the canvas; FurniturePanel, FixedElementPanel remain visible below for editing.
+- **Versions installed:** `@react-three/fiber@9.6.1`, `@react-three/drei@10.7.7`, `three@0.184.0`
+- **Current issue:** None. `npx tsc --noEmit` passes clean. 168 tests pass.
+- **Next steps:** Verify 3D preview on mobile touch devices. Consider adding furniture labels (name text floating above each block) as a future enhancement.
 - **Things not to forget:**
-  - `VersionTabs` inline menu (rename/duplicate/delete) only shows when active tab is tapped; auto-closes on version switch.
-  - Rename of fixed element: tap the element name text in the `FixedElementPanel` list to enter inline edit mode.
-  - `getLayoutVersionSummaries` is called only when `versions.length > 1` or `showCompare` is true (avoids redundant recalculation).
+  - `@react-three/fiber` extends JSX namespace globally via type augmentation; no special tsconfig changes needed.
+  - Wall transparency (`opacity: 0.4`) is intentional so camera can see inside the room from all angles.
+  - Camera initial position is set via Canvas `camera` prop (mount-time only); subsequent preset changes go through `CameraRig` useEffect + OrbitControls ref.
 
 ---
 
 ## Recent Changes
 
-- **2026-06-01** — Layout version compare + fixed element labels/rename (this session)
+- **2026-06-02** — 3D block preview mode: ThreePreview component, 2D/3D toggle, furniture height defaults
+- **2026-06-02** — Canvas readability refactor: CanvasDisplayOptions, warning icons (⚠), size-label gating, display chips
+- **2026-06-01** — Layout version compare + fixed element labels/rename
 - **2026-06-01** — Fixed elements feature (doors, windows, built-in closets, obstacles) — 7 files
 - **2026-06-01** — Room preset dimensions fixed (all 원룸 presets now match labeled 평수)
 - **2026-06-01** — Room simulator export: wired `ResultSummary` to full export pipeline, removed legacy `exportRoomAsImage`

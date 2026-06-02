@@ -8,6 +8,7 @@ import { FixedElementPanel } from './components/FixedElementPanel'
 import { VersionTabs } from './components/VersionTabs'
 import { CompareView } from './components/CompareView'
 import { ResultSummary } from './components/ResultSummary'
+import { ThreePreview } from './components/ThreePreview'
 import {
   getOccupancyPercent,
   getOccupancyStatus,
@@ -49,6 +50,7 @@ export function RoomSimulatorTool() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [displayOptions, setDisplayOptions] = useState<CanvasDisplayOptions>(getDefaultCanvasDisplayOptions)
   const [showCompare, setShowCompare] = useState(false)
+  const [show3D, setShow3D] = useState(false)
 
   // ── Active version patch helpers ────────────────────────────────────────────
 
@@ -208,6 +210,7 @@ export function RoomSimulatorTool() {
     setSelectedId(null)
     setDisplayOptions(getDefaultCanvasDisplayOptions())
     setShowCompare(false)
+    setShow3D(false)
   }
 
   // ── Derived values ──────────────────────────────────────────────────────────
@@ -394,18 +397,35 @@ export function RoomSimulatorTool() {
                   </div>
                 )}
 
-                {/* Canvas */}
-                <RoomCanvas
-                  room={room}
-                  furniture={furniture}
-                  selectedId={selectedId}
-                  onSelect={setSelectedId}
-                  onMove={handleMove}
-                  displayOptions={displayOptions}
-                  fixedElements={fixedElements}
-                  onFixedMove={handleMoveFixed}
-                  warnings={warnings}
-                />
+                {/* 2D / 3D toggle */}
+                {furniture.length > 0 && (
+                  <div style={{ display: 'flex', gap: 4 }}>
+                    <ViewToggle label="2D 배치" active={!show3D} onClick={() => setShow3D(false)} />
+                    <ViewToggle label="3D 보기" active={show3D} onClick={() => setShow3D(true)} />
+                  </div>
+                )}
+
+                {/* Canvas or 3D preview */}
+                {show3D && furniture.length > 0 ? (
+                  <ThreePreview
+                    room={room}
+                    furniture={furniture}
+                    fixedElements={fixedElements}
+                    warnings={warnings}
+                  />
+                ) : (
+                  <RoomCanvas
+                    room={room}
+                    furniture={furniture}
+                    selectedId={selectedId}
+                    onSelect={setSelectedId}
+                    onMove={handleMove}
+                    displayOptions={displayOptions}
+                    fixedElements={fixedElements}
+                    onFixedMove={handleMoveFixed}
+                    warnings={warnings}
+                  />
+                )}
 
                 {/* Empty state: quick-add chips */}
                 {furniture.length === 0 && (
@@ -510,16 +530,29 @@ export function RoomSimulatorTool() {
         {/* Step 3: Result */}
         {step === 'result' && (
           <div className="space-y-4">
-            <RoomCanvas
-              room={room}
-              furniture={furniture}
-              selectedId={null}
-              onSelect={() => {}}
-              onMove={() => {}}
-              readonly
-              fixedElements={fixedElements}
-              warnings={warnings}
-            />
+            <div style={{ display: 'flex', gap: 4 }}>
+              <ViewToggle label="2D 배치" active={!show3D} onClick={() => setShow3D(false)} />
+              <ViewToggle label="3D 보기" active={show3D} onClick={() => setShow3D(true)} />
+            </div>
+            {show3D ? (
+              <ThreePreview
+                room={room}
+                furniture={furniture}
+                fixedElements={fixedElements}
+                warnings={warnings}
+              />
+            ) : (
+              <RoomCanvas
+                room={room}
+                furniture={furniture}
+                selectedId={null}
+                onSelect={() => {}}
+                onMove={() => {}}
+                readonly
+                fixedElements={fixedElements}
+                warnings={warnings}
+              />
+            )}
             <ResultSummary
               room={room}
               furniture={furniture}
@@ -532,6 +565,29 @@ export function RoomSimulatorTool() {
         )}
       </div>
     </div>
+  )
+}
+
+// ─── ViewToggle ───────────────────────────────────────────────────────────────
+
+function ViewToggle({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        flex: 1,
+        padding: '8px',
+        borderRadius: 'var(--radius-button)',
+        border: `1px solid ${active ? 'var(--primary)' : 'var(--hairline)'}`,
+        backgroundColor: active ? 'var(--primary)' : 'var(--surface-card)',
+        color: active ? 'var(--on-primary)' : 'var(--on-dark-mute)',
+        fontSize: '13px',
+        fontWeight: 600,
+        cursor: 'pointer',
+      }}
+    >
+      {label}
+    </button>
   )
 }
 
