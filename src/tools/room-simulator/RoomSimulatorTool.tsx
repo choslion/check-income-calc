@@ -24,6 +24,8 @@ import {
   getLayoutVersionSummaries,
 } from './utils/versions'
 import { QUICK_ADD_PRESETS, FURNITURE_COLORS, type FurniturePreset } from './data/presets'
+import type { CanvasDisplayOptions } from './utils/canvasDisplay'
+import { getDefaultCanvasDisplayOptions } from './utils/canvasDisplay'
 
 const DEFAULT_ROOM: Room = { width: 360, height: 540 }
 
@@ -45,7 +47,7 @@ export function RoomSimulatorTool() {
 
   const [step, setStep] = useState<Step>('room')
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [showAllClearance, setShowAllClearance] = useState(false)
+  const [displayOptions, setDisplayOptions] = useState<CanvasDisplayOptions>(getDefaultCanvasDisplayOptions)
   const [showCompare, setShowCompare] = useState(false)
 
   // ── Active version patch helpers ────────────────────────────────────────────
@@ -204,7 +206,7 @@ export function RoomSimulatorTool() {
     setSimState(makeInitialState())
     setStep('room')
     setSelectedId(null)
-    setShowAllClearance(false)
+    setDisplayOptions(getDefaultCanvasDisplayOptions())
     setShowCompare(false)
   }
 
@@ -331,29 +333,26 @@ export function RoomSimulatorTool() {
                       backgroundColor: 'var(--surface-card)',
                       borderRadius: 'var(--radius-card)',
                       padding: '12px 16px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: 8,
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                      <span
-                        className="text-2xl font-bold"
-                        style={{ color: status.color, fontFamily: 'var(--font-number)' }}
-                      >
-                        {pct}%
-                      </span>
-                      <span className="text-sm" style={{ color: 'var(--on-dark-mute)' }}>
-                        {status.label}
-                      </span>
-                      {warnings.length > 0 && (
-                        <span style={{ color: '#f7d04f', fontSize: '13px' }}>
-                          ⚠ {warnings.length}
+                    {/* Row 1: stats + compare button */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                        <span
+                          className="text-2xl font-bold"
+                          style={{ color: status.color, fontFamily: 'var(--font-number)' }}
+                        >
+                          {pct}%
                         </span>
-                      )}
-                    </div>
-                    <div style={{ display: 'flex', gap: 6 }}>
+                        <span className="text-sm" style={{ color: 'var(--on-dark-mute)' }}>
+                          {status.label}
+                        </span>
+                        {warnings.length > 0 && (
+                          <span style={{ color: '#f7d04f', fontSize: '13px' }}>
+                            ⚠ {warnings.length}
+                          </span>
+                        )}
+                      </div>
                       {versions.length > 1 && (
                         <button
                           onClick={() => setShowCompare(true)}
@@ -372,22 +371,25 @@ export function RoomSimulatorTool() {
                           비교
                         </button>
                       )}
-                      <button
-                        onClick={() => setShowAllClearance(v => !v)}
-                        style={{
-                          padding: '5px 12px',
-                          borderRadius: 'var(--radius-pill)',
-                          border: `1px solid ${showAllClearance ? 'var(--primary)' : 'var(--hairline)'}`,
-                          backgroundColor: showAllClearance ? 'var(--primary)' : 'var(--surface-input)',
-                          color: showAllClearance ? 'var(--on-primary)' : 'var(--on-dark-mute)',
-                          fontSize: '12px',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                          flexShrink: 0,
-                        }}
-                      >
-                        간격 보기
-                      </button>
+                    </div>
+
+                    {/* Row 2: display option chips */}
+                    <div style={{ display: 'flex', gap: 5, marginTop: 10, flexWrap: 'wrap' }}>
+                      <DisplayChip
+                        label="크기 표시"
+                        active={displayOptions.showFurnitureSizes}
+                        onToggle={() => setDisplayOptions(o => ({ ...o, showFurnitureSizes: !o.showFurnitureSizes }))}
+                      />
+                      <DisplayChip
+                        label="간격선"
+                        active={displayOptions.showSpacingGuides}
+                        onToggle={() => setDisplayOptions(o => ({ ...o, showSpacingGuides: !o.showSpacingGuides }))}
+                      />
+                      <DisplayChip
+                        label="경고 아이콘"
+                        active={displayOptions.showWarningIcons}
+                        onToggle={() => setDisplayOptions(o => ({ ...o, showWarningIcons: !o.showWarningIcons }))}
+                      />
                     </div>
                   </div>
                 )}
@@ -399,9 +401,10 @@ export function RoomSimulatorTool() {
                   selectedId={selectedId}
                   onSelect={setSelectedId}
                   onMove={handleMove}
-                  showAllClearance={showAllClearance}
+                  displayOptions={displayOptions}
                   fixedElements={fixedElements}
                   onFixedMove={handleMoveFixed}
+                  warnings={warnings}
                 />
 
                 {/* Empty state: quick-add chips */}
@@ -513,9 +516,9 @@ export function RoomSimulatorTool() {
               selectedId={null}
               onSelect={() => {}}
               onMove={() => {}}
-              showAllClearance={false}
               readonly
               fixedElements={fixedElements}
+              warnings={warnings}
             />
             <ResultSummary
               room={room}
@@ -529,5 +532,36 @@ export function RoomSimulatorTool() {
         )}
       </div>
     </div>
+  )
+}
+
+// ─── DisplayChip ──────────────────────────────────────────────────────────────
+
+function DisplayChip({
+  label,
+  active,
+  onToggle,
+}: {
+  label: string
+  active: boolean
+  onToggle: () => void
+}) {
+  return (
+    <button
+      onClick={onToggle}
+      style={{
+        padding: '4px 10px',
+        borderRadius: 'var(--radius-pill)',
+        border: `1px solid ${active ? 'var(--primary)' : 'var(--hairline)'}`,
+        backgroundColor: active ? 'var(--primary)' : 'var(--surface-input)',
+        color: active ? 'var(--on-primary)' : 'var(--on-dark-mute)',
+        fontSize: '12px',
+        fontWeight: 600,
+        cursor: 'pointer',
+        flexShrink: 0,
+      }}
+    >
+      {label}
+    </button>
   )
 }

@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react'
-import type { Room, FurnitureItem, FixedElement } from '../types'
+import type { Room, FurnitureItem, FixedElement, ClearanceWarning } from '../types'
 import {
   getFurnitureDimensions,
   getWallClearance,
@@ -8,6 +8,8 @@ import {
   FIXED_ELEMENT_COLORS,
 } from '../utils/geometry'
 import { formatFurnitureSize, formatDistance } from '../utils/formatters'
+import type { CanvasDisplayOptions } from '../utils/canvasDisplay'
+import { getDefaultCanvasDisplayOptions } from '../utils/canvasDisplay'
 
 const CLEARANCE_CM = 60
 const MIN_CLEARANCE_CM = 60
@@ -18,10 +20,11 @@ interface Props {
   selectedId: string | null
   onSelect: (id: string | null) => void
   onMove: (id: string, x: number, y: number) => void
-  showAllClearance: boolean
+  displayOptions?: CanvasDisplayOptions
   readonly?: boolean
   fixedElements?: FixedElement[]
   onFixedMove?: (id: string, xCm: number, yCm: number) => void
+  warnings?: ClearanceWarning[]
 }
 
 export function RoomCanvas({
@@ -30,10 +33,11 @@ export function RoomCanvas({
   selectedId,
   onSelect,
   onMove,
-  showAllClearance,
+  displayOptions = getDefaultCanvasDisplayOptions(),
   readonly = false,
   fixedElements = [],
   onFixedMove,
+  warnings = [],
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerWidth, setContainerWidth] = useState(320)
@@ -57,6 +61,16 @@ export function RoomCanvas({
   const yGridLines: number[] = []
   for (let v = gridInterval; v < room.width; v += gridInterval) xGridLines.push(v)
   for (let v = gridInterval; v < room.height; v += gridInterval) yGridLines.push(v)
+
+  // Compute which furniture items have active warnings
+  const warnedFurnitureIds = new Set<string>()
+  if (warnings.length > 0) {
+    for (const f of furniture) {
+      if (warnings.some(w => w.id.includes(f.id))) {
+        warnedFurnitureIds.add(f.id)
+      }
+    }
+  }
 
   return (
     <div
@@ -128,6 +142,7 @@ export function RoomCanvas({
           scale={scale}
           room={room}
           readonly={readonly}
+          showFixedElementLabels={displayOptions.showFixedElementLabels}
           onMove={onFixedMove}
         />
       ))}
@@ -140,7 +155,10 @@ export function RoomCanvas({
           scale={scale}
           room={room}
           isSelected={item.id === selectedId}
-          showClearance={showAllClearance || item.showClearance}
+          showClearance={displayOptions.showSpacingGuides || item.showClearance}
+          showFurnitureSizes={displayOptions.showFurnitureSizes}
+          hasWarning={warnedFurnitureIds.has(item.id)}
+          showWarningIcon={displayOptions.showWarningIcons}
           readonly={readonly}
           onSelect={onSelect}
           onMove={onMove}
@@ -392,10 +410,11 @@ interface FixedElementRectProps {
   scale: number
   room: Room
   readonly: boolean
+  showFixedElementLabels: boolean
   onMove?: (id: string, xCm: number, yCm: number) => void
 }
 
-function FixedElementRect({ el, scale, room, readonly, onMove }: FixedElementRectProps) {
+function FixedElementRect({ el, scale, room, readonly, showFixedElementLabels, onMove }: FixedElementRectProps) {
   const color = FIXED_ELEMENT_COLORS[el.type]
   const isWall = !!el.wallSide
   const clearanceZone = getDoorClearanceZone(el)
@@ -447,13 +466,7 @@ function FixedElementRect({ el, scale, room, readonly, onMove }: FixedElementRec
 
   const pxW = el.widthCm * scale
   const pxH = el.depthCm * scale
-  const showLabel = pxW > 24 && pxH > 14
-  const showSize = pxW > 46 && pxH > 28
-
-  // For wall elements show just the opening dimension; for floor elements show W×D
-  const sizeText = isWall
-    ? `${(el.wallSide === 'top' || el.wallSide === 'bottom') ? el.widthCm : el.depthCm}cm`
-    : `${el.widthCm}×${el.depthCm}cm`
+  const showLabel = showFixedElementLabels && pxW > 24 && pxH > 14
 
   return (
     <>
@@ -497,7 +510,6 @@ function FixedElementRect({ el, scale, room, readonly, onMove }: FixedElementRec
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: 1,
           overflow: 'hidden',
           touchAction: 'none',
           borderRadius: isWall ? 2 : 3,
@@ -524,26 +536,6 @@ function FixedElementRect({ el, scale, room, readonly, onMove }: FixedElementRec
             {el.name}
           </span>
         )}
-        {showSize && (
-          <span
-            style={{
-              fontSize: Math.min(9, Math.max(6, Math.min(pxW, pxH) / 3.5)),
-              color: isWall ? 'rgba(255,255,255,0.75)' : color + 'bb',
-              fontFamily: 'var(--font-number)',
-              fontWeight: 500,
-              textAlign: 'center',
-              pointerEvents: 'none',
-              userSelect: 'none',
-              maxWidth: '100%',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              lineHeight: 1.2,
-            }}
-          >
-            {sizeText}
-          </span>
-        )}
       </div>
     </>
   )
@@ -557,6 +549,9 @@ interface FurnitureRectProps {
   room: Room
   isSelected: boolean
   showClearance: boolean
+  showFurnitureSizes: boolean
+  hasWarning: boolean
+  showWarningIcon: boolean
   readonly: boolean
   onSelect: (id: string) => void
   onMove: (id: string, x: number, y: number) => void
@@ -568,6 +563,9 @@ function FurnitureRect({
   room,
   isSelected,
   showClearance,
+  showFurnitureSizes,
+  hasWarning,
+  showWarningIcon,
   readonly,
   onSelect,
   onMove,
@@ -590,8 +588,8 @@ function FurnitureRect({
   const pxW = w * scale
   const pxH = h * scale
 
-  // Label visibility thresholds
-  const showSizeLabel = pxW > 58 && pxH > 42
+  // Size label: show when explicitly enabled or the item is selected
+  const showSizeLabel = (showFurnitureSizes || isSelected) && pxW > 58 && pxH > 42
   const showNameOnly = pxW > 28 && pxH > 18
 
   const nameFontSize = Math.min(13, Math.max(7, Math.min(w, h) * scale / 5))
@@ -673,6 +671,24 @@ function FurnitureRect({
           padding: '2px 3px',
         }}
       >
+        {/* Warning icon badge */}
+        {hasWarning && showWarningIcon && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 2,
+              right: 3,
+              fontSize: '9px',
+              color: '#f7d04f',
+              lineHeight: 1,
+              pointerEvents: 'none',
+              userSelect: 'none',
+            }}
+          >
+            ⚠
+          </div>
+        )}
+
         {showNameOnly && (
           <span
             style={{
