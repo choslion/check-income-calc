@@ -229,20 +229,18 @@ export function ResultSummary({ room, furniture, fixedElements, layoutVersionNam
             style={{
               padding: '16px 20px 14px',
               borderBottom: scoreResult.suggestions.length > 0 ? '1px solid var(--hairline)' : 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 12,
             }}
           >
-            <div>
-              <p
-                className="text-xs font-semibold tracking-widest uppercase mb-2"
-                style={{ color: 'var(--on-dark-mute)' }}
-              >
-                배치 점수
-              </p>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+            <p
+              className="text-xs font-semibold tracking-widest uppercase mb-2"
+              style={{ color: 'var(--on-dark-mute)' }}
+            >
+              배치 점수
+            </p>
+
+            {/* Score number + status — single row, no competing column */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 5, flexShrink: 0 }}>
                 <span
                   style={{
                     fontSize: '42px',
@@ -255,25 +253,37 @@ export function ResultSummary({ room, furniture, fixedElements, layoutVersionNam
                 >
                   {scoreResult.score}
                 </span>
-                <span style={{ fontSize: '16px', color: 'var(--muted)', fontFamily: 'var(--font-number)' }}>
+                <span style={{ fontSize: '15px', color: 'var(--muted)', fontFamily: 'var(--font-number)' }}>
                   / 100
                 </span>
               </div>
-              <p className="text-sm font-semibold mt-1" style={{ color: scoreColor }}>
+              <span className="text-sm font-semibold" style={{ color: scoreColor }}>
                 {scoreResult.statusLabel}
-              </p>
+              </span>
             </div>
-            {/* Score breakdown dots */}
-            <div style={{ textAlign: 'right', flexShrink: 0 }}>
-              {scoreResult.breakdown.slice(0, 3).map((item, i) => (
-                <p key={i} className="text-xs" style={{ color: 'var(--muted)', lineHeight: 1.6 }}>
-                  -{item.penalty}점 · {item.label}
-                </p>
-              ))}
-              {scoreResult.breakdown.length === 0 && (
-                <p className="text-xs" style={{ color: '#4fc98a' }}>주요 경고 없음</p>
-              )}
-            </div>
+
+            {/* Breakdown as compact pills below */}
+            {scoreResult.breakdown.length > 0 ? (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 10 }}>
+                {scoreResult.breakdown.slice(0, 4).map((item, i) => (
+                  <span
+                    key={i}
+                    style={{
+                      fontSize: '11px',
+                      color: 'var(--muted)',
+                      backgroundColor: 'var(--surface-input)',
+                      borderRadius: 4,
+                      padding: '2px 7px',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    -{item.penalty}점 · {item.label}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs mt-2" style={{ color: '#4fc98a' }}>주요 경고 없음</p>
+            )}
           </div>
 
           {/* Main suggestion */}
