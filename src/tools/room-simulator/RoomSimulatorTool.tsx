@@ -13,7 +13,9 @@ import {
   getOccupancyStatus,
   checkClearances,
   findInitialPosition,
+  makeWallElement,
 } from './utils/geometry'
+import type { WallSide } from './types'
 import {
   createLayoutVersion,
   duplicateLayoutVersion,
@@ -168,6 +170,32 @@ export function RoomSimulatorTool() {
 
   function handleMoveFixed(id: string, xCm: number, yCm: number) {
     patchActive({ fixedElements: fixedElements.map(e => (e.id === id ? { ...e, xCm, yCm } : e)) })
+  }
+
+  function handleRotateFixed(id: string) {
+    const el = fixedElements.find(e => e.id === id)
+    if (!el) return
+
+    if (el.wallSide) {
+      // Cycle wall side: top → right → bottom → left → top
+      const order: WallSide[] = ['top', 'right', 'bottom', 'left']
+      const nextSide = order[(order.indexOf(el.wallSide) + 1) % 4]
+      const opening = (el.wallSide === 'top' || el.wallSide === 'bottom') ? el.widthCm : el.depthCm
+      const rotated = { ...el, ...makeWallElement(room, nextSide, opening, el.type, el.name) }
+      patchActive({ fixedElements: fixedElements.map(e => e.id === id ? rotated : e) })
+    } else {
+      // Floor element: swap width ↔ depth, re-clamp to room bounds
+      const newW = el.depthCm
+      const newD = el.widthCm
+      const rotated = {
+        ...el,
+        widthCm: newW,
+        depthCm: newD,
+        xCm: Math.max(0, Math.min(room.width - newW, el.xCm)),
+        yCm: Math.max(0, Math.min(room.height - newD, el.yCm)),
+      }
+      patchActive({ fixedElements: fixedElements.map(e => e.id === id ? rotated : e) })
+    }
   }
 
   // ── Reset ───────────────────────────────────────────────────────────────────
@@ -418,6 +446,7 @@ export function RoomSimulatorTool() {
                   onAdd={handleAddFixedElement}
                   onDelete={handleDeleteFixedElement}
                   onRename={handleRenameFixedElement}
+                  onRotate={handleRotateFixed}
                 />
 
                 {/* Furniture management panel */}

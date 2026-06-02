@@ -15,6 +15,7 @@ interface Props {
   onAdd: (el: Omit<FixedElement, 'id'>) => void
   onDelete: (id: string) => void
   onRename: (id: string, name: string) => void
+  onRotate: (id: string) => void
 }
 
 type PanelMode = 'list' | 'add'
@@ -39,7 +40,7 @@ function getOpeningLabel(el: FixedElement): string {
   return `${WALL_SIDE_LABELS[el.wallSide!]} · ${opening}cm`
 }
 
-export function FixedElementPanel({ room, fixedElements, onAdd, onDelete, onRename }: Props) {
+export function FixedElementPanel({ room, fixedElements, onAdd, onDelete, onRename, onRotate }: Props) {
   const [expanded, setExpanded] = useState(false)
   const [mode, setMode] = useState<PanelMode>('list')
   const [renamingId, setRenamingId] = useState<string | null>(null)
@@ -209,6 +210,22 @@ export function FixedElementPanel({ room, fixedElements, onAdd, onDelete, onRena
                         {getOpeningLabel(el)}
                       </p>
                     </div>
+                    <button
+                      onClick={() => onRotate(el.id)}
+                      title={el.wallSide ? '벽 방향 변경' : '가로↔세로 전환'}
+                      style={{
+                        color: 'var(--on-dark-mute)',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: '4px 6px',
+                        fontSize: '15px',
+                        lineHeight: 1,
+                        flexShrink: 0,
+                      }}
+                    >
+                      ↻
+                    </button>
                     <button
                       onClick={() => onDelete(el.id)}
                       style={{

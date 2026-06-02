@@ -448,6 +448,12 @@ function FixedElementRect({ el, scale, room, readonly, onMove }: FixedElementRec
   const pxW = el.widthCm * scale
   const pxH = el.depthCm * scale
   const showLabel = pxW > 24 && pxH > 14
+  const showSize = pxW > 46 && pxH > 28
+
+  // For wall elements show just the opening dimension; for floor elements show W×D
+  const sizeText = isWall
+    ? `${(el.wallSide === 'top' || el.wallSide === 'bottom') ? el.widthCm : el.depthCm}cm`
+    : `${el.widthCm}×${el.depthCm}cm`
 
   return (
     <>
@@ -488,11 +494,14 @@ function FixedElementRect({ el, scale, room, readonly, onMove }: FixedElementRec
           cursor: draggable ? 'grab' : 'default',
           zIndex: 2,
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
+          gap: 1,
           overflow: 'hidden',
           touchAction: 'none',
           borderRadius: isWall ? 2 : 3,
+          padding: '2px 3px',
         }}
       >
         {showLabel && (
@@ -509,10 +518,30 @@ function FixedElementRect({ el, scale, room, readonly, onMove }: FixedElementRec
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
-              padding: '0 2px',
+              lineHeight: 1.25,
             }}
           >
             {el.name}
+          </span>
+        )}
+        {showSize && (
+          <span
+            style={{
+              fontSize: Math.min(9, Math.max(6, Math.min(pxW, pxH) / 3.5)),
+              color: isWall ? 'rgba(255,255,255,0.75)' : color + 'bb',
+              fontFamily: 'var(--font-number)',
+              fontWeight: 500,
+              textAlign: 'center',
+              pointerEvents: 'none',
+              userSelect: 'none',
+              maxWidth: '100%',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              lineHeight: 1.2,
+            }}
+          >
+            {sizeText}
           </span>
         )}
       </div>
