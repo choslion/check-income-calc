@@ -8,6 +8,7 @@ import {
   getDoorClearanceZone,
   FIXED_ELEMENT_COLORS,
 } from './geometry'
+import { calculateLayoutScore } from './layoutScore'
 
 export { canUseNativeShare, getExportFileName } from '../../../features/room-layout/export/exportLayoutImage'
 
@@ -35,6 +36,7 @@ export async function createLayoutBlob(
     allWarnings.find(w => w.id.includes('overlap')) ??
     allWarnings[0] ??
     null
+  const scoreResult = calculateLayoutScore(room, furniture, fixedElements)
 
   // Scale room to fit CONTENT_W × MAX_CANVAS_H
   const scaleByW = CONTENT_W / room.width
@@ -45,7 +47,8 @@ export async function createLayoutBlob(
   const canvasX = PADDING + Math.round((CONTENT_W - canvasW) / 2)
 
   const hasWarning = !!mainWarning
-  const FOOTER_H = hasWarning ? 92 : 72
+  const hasSuggestion = !!scoreResult.mainSuggestion && furniture.length > 0
+  const FOOTER_H = hasWarning || hasSuggestion ? 112 : 72
   const TOTAL_H = PADDING + HEADER_H + canvasH + 24 + FOOTER_H + PADDING
 
   const el = document.createElement('canvas')
@@ -234,18 +237,35 @@ export async function createLayoutBlob(
   ctx.fillStyle = status.color
   ctx.fillText(status.label, PADDING + 72, y + 5)
 
-  // Room + furniture info (right-aligned)
-  ctx.font = '400 12px Inter, sans-serif'
-  ctx.fillStyle = 'rgba(255,255,255,0.38)'
+  // Score (right-aligned, same line as occupancy %)
+  if (furniture.length > 0) {
+    ctx.font = '600 12px Inter, sans-serif'
+    ctx.fillStyle = 'rgba(255,255,255,0.55)'
+    ctx.textAlign = 'right'
+    ctx.fillText(`배치 점수 ${scoreResult.score}점 · ${scoreResult.statusLabel}`, EXPORT_W - PADDING, y + 6)
+  }
+
+  // Room + furniture info (second right line)
+  ctx.font = '400 11px Inter, sans-serif'
+  ctx.fillStyle = 'rgba(255,255,255,0.28)'
   ctx.textAlign = 'right'
   ctx.fillText(
     `방 ${room.width}×${room.height}cm · 가구 ${furniture.length}개`,
     EXPORT_W - PADDING,
-    y + 6,
+    y + 22,
   )
 
-  // Warning line
-  if (mainWarning) {
+  // Main suggestion line
+  if (hasSuggestion) {
+    y += 32
+    ctx.font = '400 11px Inter, sans-serif'
+    ctx.fillStyle = 'rgba(255,255,255,0.6)'
+    ctx.textAlign = 'left'
+    ctx.fillText(`💡 ${scoreResult.mainSuggestion}`, PADDING, y, CONTENT_W)
+  }
+
+  // Warning line (if no suggestion shown, show warning)
+  if (!hasSuggestion && mainWarning) {
     y += 30
     ctx.font = '400 12px Inter, sans-serif'
     ctx.fillStyle = '#f7d04f'

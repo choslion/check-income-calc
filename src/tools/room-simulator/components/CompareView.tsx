@@ -1,6 +1,7 @@
 import { ChevronLeft } from 'lucide-react'
 import type { LayoutVersion, LayoutVersionSummary } from '../types'
 import { getFurnitureDimensions, FIXED_ELEMENT_COLORS } from '../utils/geometry'
+import { getScoreColor } from '../utils/layoutScore'
 
 interface Props {
   versions: LayoutVersion[]
@@ -167,12 +168,14 @@ function VersionCard({ summary, version, isActive, onSelect }: VersionCardProps)
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <SummaryRow label="배치 점수">
+            <span style={{ color: getScoreColor(summary.score >= 90 ? 'excellent' : summary.score >= 75 ? 'good' : summary.score >= 60 ? 'needsImprovement' : summary.score >= 40 ? 'tight' : 'problematic'), fontWeight: 700, fontSize: 13 }}>
+              {summary.score}점
+            </span>
+          </SummaryRow>
           <SummaryRow label="점유율">
             <span style={{ color: summary.status.color, fontWeight: 700 }}>
               {summary.occupancyPercent}%
-            </span>
-            <span style={{ color: 'var(--muted)', fontSize: 10, marginLeft: 3 }}>
-              {summary.status.label}
             </span>
           </SummaryRow>
 

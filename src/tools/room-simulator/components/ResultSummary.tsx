@@ -6,10 +6,9 @@ import {
   getFurnitureArea,
   getOccupancyPercent,
   getOccupancyStatus,
-  checkClearances,
-  checkFixedElementConflicts,
   getFurnitureDimensions,
 } from '../utils/geometry'
+import { calculateLayoutScore, getScoreColor } from '../utils/layoutScore'
 import { createLayoutBlob, shareOrDownload, canUseNativeShare, getExportFileName } from '../utils/export'
 
 interface Props {
@@ -24,10 +23,9 @@ interface Props {
 export function ResultSummary({ room, furniture, fixedElements, layoutVersionName, onReset, onBack }: Props) {
   const totalPct = getOccupancyPercent(room, furniture)
   const status = getOccupancyStatus(totalPct)
-  const fixedWarnings = checkFixedElementConflicts(furniture, fixedElements)
-  const clearanceWarnings = checkClearances(room, furniture)
-  const warnings = [...fixedWarnings, ...clearanceWarnings]
   const roomArea = getRoomArea(room)
+  const scoreResult = calculateLayoutScore(room, furniture, fixedElements)
+  const scoreColor = getScoreColor(scoreResult.status)
 
   const [isExporting, setIsExporting] = useState(false)
   const [exportError, setExportError] = useState<string | null>(null)
@@ -217,8 +215,8 @@ export function ResultSummary({ room, furniture, fixedElements, layoutVersionNam
         </div>
       )}
 
-      {/* Clearance warnings */}
-      {warnings.length > 0 ? (
+      {/* Layout score card */}
+      {furniture.length > 0 && (
         <div
           style={{
             backgroundColor: 'var(--surface-card)',
@@ -226,72 +224,126 @@ export function ResultSummary({ room, furniture, fixedElements, layoutVersionNam
             overflow: 'hidden',
           }}
         >
-          <div style={{ padding: '13px 20px', borderBottom: '1px solid var(--hairline)' }}>
-            <p
-              className="text-xs font-semibold tracking-widest uppercase"
-              style={{ color: 'var(--on-dark-mute)' }}
-            >
-              통로 주의 ({warnings.length})
-            </p>
+          {/* Score header */}
+          <div
+            style={{
+              padding: '16px 20px 14px',
+              borderBottom: scoreResult.suggestions.length > 0 ? '1px solid var(--hairline)' : 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 12,
+            }}
+          >
+            <div>
+              <p
+                className="text-xs font-semibold tracking-widest uppercase mb-2"
+                style={{ color: 'var(--on-dark-mute)' }}
+              >
+                배치 점수
+              </p>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                <span
+                  style={{
+                    fontSize: '42px',
+                    fontWeight: 900,
+                    color: scoreColor,
+                    fontFamily: 'var(--font-number)',
+                    letterSpacing: '-2px',
+                    lineHeight: 1,
+                  }}
+                >
+                  {scoreResult.score}
+                </span>
+                <span style={{ fontSize: '16px', color: 'var(--muted)', fontFamily: 'var(--font-number)' }}>
+                  / 100
+                </span>
+              </div>
+              <p className="text-sm font-semibold mt-1" style={{ color: scoreColor }}>
+                {scoreResult.statusLabel}
+              </p>
+            </div>
+            {/* Score breakdown dots */}
+            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+              {scoreResult.breakdown.slice(0, 3).map((item, i) => (
+                <p key={i} className="text-xs" style={{ color: 'var(--muted)', lineHeight: 1.6 }}>
+                  -{item.penalty}점 · {item.label}
+                </p>
+              ))}
+              {scoreResult.breakdown.length === 0 && (
+                <p className="text-xs" style={{ color: '#4fc98a' }}>주요 경고 없음</p>
+              )}
+            </div>
           </div>
-          {warnings.slice(0, 6).map(w => (
+
+          {/* Main suggestion */}
+          {scoreResult.mainSuggestion && (
             <div
-              key={w.id}
               style={{
-                padding: '11px 20px',
+                padding: '12px 20px',
+                backgroundColor: `${scoreColor}0d`,
+                borderBottom: scoreResult.suggestions.length > 1 ? '1px solid var(--hairline)' : 'none',
+                display: 'flex',
+                gap: 10,
+                alignItems: 'flex-start',
+              }}
+            >
+              <span style={{ color: scoreColor, flexShrink: 0, fontSize: '14px', marginTop: 1 }}>💡</span>
+              <p className="text-sm" style={{ color: 'var(--on-dark)', lineHeight: 1.5, fontWeight: 500 }}>
+                {scoreResult.mainSuggestion}
+              </p>
+            </div>
+          )}
+
+          {/* Additional suggestions */}
+          {scoreResult.suggestions.slice(1, 5).map((s, i) => (
+            <div
+              key={i}
+              style={{
+                padding: '10px 20px',
                 borderTop: '1px solid var(--hairline)',
                 display: 'flex',
                 gap: 10,
                 alignItems: 'flex-start',
               }}
             >
-              <span style={{ color: '#f7d04f', flexShrink: 0, fontSize: '14px', marginTop: 1 }}>⚠</span>
+              <span style={{ color: 'var(--muted)', flexShrink: 0, fontSize: '12px', marginTop: 2 }}>›</span>
               <p className="text-sm" style={{ color: 'var(--on-dark-mute)', lineHeight: 1.5 }}>
-                {w.message}
+                {s}
               </p>
             </div>
           ))}
-          {warnings.length > 6 && (
+
+          {/* No issues message */}
+          {scoreResult.suggestions.length === 0 && (
             <div
               style={{
-                padding: '8px 20px 12px',
-                borderTop: '1px solid var(--hairline)',
+                padding: '12px 20px',
+                display: 'flex',
+                gap: 10,
+                alignItems: 'center',
               }}
             >
-              <p className="text-xs" style={{ color: 'var(--muted)' }}>
-                외 {warnings.length - 6}개 주의사항
+              <span style={{ color: '#4fc98a', fontSize: '16px' }}>✓</span>
+              <p className="text-sm" style={{ color: 'var(--on-dark-mute)' }}>
+                현재 기준에서 큰 경고가 없어요. 좋은 배치예요.
               </p>
             </div>
           )}
+
           <div
             style={{
-              padding: '10px 20px 12px',
+              padding: '8px 20px 10px',
               borderTop: '1px solid var(--hairline)',
-              backgroundColor: 'rgba(247,208,79,0.04)',
+              backgroundColor: 'rgba(0,0,0,0.1)',
             }}
           >
             <p className="text-xs" style={{ color: 'var(--muted)', lineHeight: 1.5 }}>
-              기준: 통로 60cm 이하. 실제 생활 환경에 따라 다를 수 있어요. 문·서랍 경고는 방 구조 정보 없이는 정확하지 않을 수 있어요.
+              점수는 통로·점유율·충돌 기준이에요. 실제 생활 환경에 따라 다를 수 있어요.
             </p>
           </div>
         </div>
-      ) : furniture.length > 0 ? (
-        <div
-          style={{
-            backgroundColor: 'var(--surface-card)',
-            borderRadius: 'var(--radius-card)',
-            padding: '16px 20px',
-            display: 'flex',
-            gap: 10,
-            alignItems: 'center',
-          }}
-        >
-          <span style={{ color: '#4fc98a', fontSize: '20px' }}>✓</span>
-          <p className="text-sm" style={{ color: 'var(--on-dark-mute)' }}>
-            모든 통로가 60cm 이상이에요. 생활하기 좋은 배치예요.
-          </p>
-        </div>
-      ) : null}
+      )}
 
       {/* Actions */}
       <div className="flex gap-3">

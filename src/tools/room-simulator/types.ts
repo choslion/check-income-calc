@@ -68,4 +68,7 @@ export interface LayoutVersionSummary {
   mainWarning: ClearanceWarning | null
   isRecommended: boolean
   recommendedReason: string | null
+  score: number
+  scoreStatusLabel: string
+  mainSuggestion: string | null
 }

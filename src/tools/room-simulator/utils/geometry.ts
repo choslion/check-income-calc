@@ -270,6 +270,24 @@ export function getDoorClearanceZone(
   }
 }
 
+export function checkFurnitureOverlaps(
+  furniture: FurnitureItem[],
+): Array<{ a: FurnitureItem; b: FurnitureItem }> {
+  const result: Array<{ a: FurnitureItem; b: FurnitureItem }> = []
+  for (let i = 0; i < furniture.length; i++) {
+    for (let j = i + 1; j < furniture.length; j++) {
+      const a = furniture[i]
+      const b = furniture[j]
+      const { w: aw, h: ah } = getFurnitureDimensions(a)
+      const { w: bw, h: bh } = getFurnitureDimensions(b)
+      if (a.x < b.x + bw && a.x + aw > b.x && a.y < b.y + bh && a.y + ah > b.y) {
+        result.push({ a, b })
+      }
+    }
+  }
+  return result
+}
+
 export function getMinimumClearanceCm(room: Room, furniture: FurnitureItem[]): number | null {
   if (furniture.length === 0) return null
   let min = Infinity

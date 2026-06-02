@@ -6,6 +6,7 @@ import {
   checkFixedElementConflicts,
   getMinimumClearanceCm,
 } from './geometry'
+import { calculateLayoutScore } from './layoutScore'
 
 const VERSION_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
@@ -62,6 +63,7 @@ function computeBaseSummary(version: LayoutVersion): BaseSummary {
   const fixedConflicts = checkFixedElementConflicts(furniture, fixedElements)
   const clearanceWarnings = checkClearances(room, furniture)
   const allWarnings = [...fixedConflicts, ...clearanceWarnings]
+  const scoreResult = calculateLayoutScore(room, furniture, fixedElements)
   return {
     layoutVersionId: version.id,
     name: version.name,
@@ -73,6 +75,9 @@ function computeBaseSummary(version: LayoutVersion): BaseSummary {
     fixedElementConflictCount: fixedConflicts.length,
     minimumClearanceCm: getMinimumClearanceCm(room, furniture),
     mainWarning: allWarnings.find(w => w.id.includes('overlap')) ?? allWarnings[0] ?? null,
+    score: scoreResult.score,
+    scoreStatusLabel: scoreResult.statusLabel,
+    mainSuggestion: scoreResult.mainSuggestion,
   }
 }
 
