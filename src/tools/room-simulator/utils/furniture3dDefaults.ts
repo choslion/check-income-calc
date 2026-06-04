@@ -11,6 +11,7 @@ const HEIGHT_RULES: { keywords: string[]; heightCm: number }[] = [
   { keywords: ['서랍장', '화장대'], heightCm: 80 },
   { keywords: ['tv장', 'TV장', '거실장'], heightCm: 50 },
   { keywords: ['협탁'], heightCm: 50 },
+  { keywords: ['의자'], heightCm: 80 },
   { keywords: ['냉장고'], heightCm: 180 },
   { keywords: ['싱크대'], heightCm: 85 },
   { keywords: ['세탁기'], heightCm: 85 },

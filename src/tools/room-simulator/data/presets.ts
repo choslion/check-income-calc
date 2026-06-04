@@ -49,18 +49,19 @@ export const FURNITURE_PRESETS: FurniturePreset[] = [
   { id: 'bed-queen',        category: 'bed',     name: '퀸 침대',       width: 150, depth: 200 },
   { id: 'bed-king',         category: 'bed',     name: '킹 침대',       width: 160, depth: 200 },
   // 책상
-  { id: 'desk-100',         category: 'desk',    name: '100cm 책상',    width: 100, depth: 60  },
-  { id: 'desk-120',         category: 'desk',    name: '120cm 책상',    width: 120, depth: 60  },
-  { id: 'desk-140',         category: 'desk',    name: '140cm 책상',    width: 140, depth: 65  },
-  { id: 'desk-160',         category: 'desk',    name: '160cm 책상',    width: 160, depth: 70  },
+  { id: 'desk-100',         category: 'desk',    name: '소형 책상',     width: 100, depth: 60  },
+  { id: 'desk-120',         category: 'desk',    name: '책상',          width: 120, depth: 60  },
+  { id: 'desk-140',         category: 'desk',    name: '대형 책상',     width: 140, depth: 65  },
+  { id: 'desk-160',         category: 'desk',    name: '와이드 책상',   width: 160, depth: 70  },
+  { id: 'chair',            category: 'desk',    name: '의자',          width: 55,  depth: 55  },
   // 식탁
   { id: 'table-2',          category: 'table',   name: '2인 식탁',      width: 80,  depth: 80  },
   { id: 'table-4',          category: 'table',   name: '4인 식탁',      width: 120, depth: 80  },
   // 주방
   { id: 'fridge',           category: 'kitchen', name: '냉장고',        width: 70,  depth: 70  },
   { id: 'fridge-mini',      category: 'kitchen', name: '소형 냉장고',   width: 55,  depth: 55  },
-  { id: 'sink-150',         category: 'kitchen', name: '싱크대 150',    width: 150, depth: 60  },
-  { id: 'sink-180',         category: 'kitchen', name: '싱크대 180',    width: 180, depth: 60  },
+  { id: 'sink-150',         category: 'kitchen', name: '싱크대',        width: 150, depth: 60  },
+  { id: 'sink-180',         category: 'kitchen', name: '대형 싱크대',   width: 180, depth: 60  },
   { id: 'washing-machine',  category: 'kitchen', name: '세탁기',        width: 60,  depth: 60  },
   // 소파
   { id: 'sofa-1',           category: 'sofa',    name: '1인 소파',      width: 80,  depth: 85  },
