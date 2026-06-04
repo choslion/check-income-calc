@@ -135,7 +135,7 @@ export default function HomePage() {
             생활계산소
           </h1>
           <p className="text-sm" style={{ color: 'var(--on-dark-mute)' }}>
-            월급, 지출, 저축처럼 자주 필요한 생활 계산을<br />빠르게 정리해보세요.
+            자주 필요한 생활 계산과 정리 도구를 한 곳에 모았어요.
           </p>
           <div className="flex gap-2 mt-4">
             <button
