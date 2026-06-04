@@ -1,8 +1,11 @@
-import { TOOLS, CATEGORY_LABELS, getToolsByCategory, type ToolCategory } from '../data/tools'
+import { TOOLS, CATEGORY_LABELS, type ToolCategory } from '../data/tools'
 import { ToolSection } from '../components/tools/ToolSection'
 import { AdBannerSlot } from '../components/ads/AdBannerSlot'
 
 const CATEGORIES: ToolCategory[] = ['money', 'work', 'utility']
+
+const availableTools = TOOLS.filter(t => t.status === 'available')
+const comingSoonTools = TOOLS.filter(t => t.status === 'coming-soon')
 
 export default function ToolsPage() {
   return (
@@ -13,17 +16,26 @@ export default function ToolsPage() {
             전체 도구
           </p>
           <h1 className="text-3xl font-bold" style={{ color: 'var(--on-dark)', letterSpacing: '-0.6px' }}>
-            {TOOLS.length}개의 계산 도구
+            {availableTools.length}개의 계산 도구
           </h1>
         </div>
 
-        {CATEGORIES.map(cat => (
-          <ToolSection
-            key={cat}
-            title={CATEGORY_LABELS[cat]}
-            tools={getToolsByCategory(cat)}
-          />
-        ))}
+        {/* Available tools — grouped by category */}
+        {CATEGORIES.map(cat => {
+          const tools = availableTools.filter(t => t.category === cat)
+          return (
+            <ToolSection
+              key={cat}
+              title={CATEGORY_LABELS[cat]}
+              tools={tools}
+            />
+          )
+        })}
+
+        {/* Coming-soon — single section at the bottom */}
+        {comingSoonTools.length > 0 && (
+          <ToolSection title="출시 예정" tools={comingSoonTools} />
+        )}
 
         <AdBannerSlot />
       </div>
