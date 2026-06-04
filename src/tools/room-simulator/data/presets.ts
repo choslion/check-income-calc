@@ -16,12 +16,13 @@ export const ROOM_PRESETS: RoomPreset[] = [
   { id: 'living', label: '작은 거실 예시', width: 400, height: 500, description: '소파·TV장 배치 예시예요' },
 ]
 
-export type FurnitureCategory = 'bed' | 'desk' | 'table' | 'sofa' | 'storage' | 'living' | 'bedroom'
+export type FurnitureCategory = 'bed' | 'desk' | 'table' | 'kitchen' | 'sofa' | 'storage' | 'living' | 'bedroom'
 
 export const CATEGORY_LABELS: Record<FurnitureCategory, string> = {
   bed: '침대',
   desk: '책상',
   table: '식탁',
+  kitchen: '주방',
   sofa: '소파',
   storage: '수납',
   living: '거실',
@@ -29,7 +30,7 @@ export const CATEGORY_LABELS: Record<FurnitureCategory, string> = {
 }
 
 export const FURNITURE_CATEGORIES: FurnitureCategory[] = [
-  'bed', 'desk', 'table', 'sofa', 'storage', 'living', 'bedroom',
+  'bed', 'desk', 'table', 'kitchen', 'sofa', 'storage', 'living', 'bedroom',
 ]
 
 export interface FurniturePreset {
@@ -55,6 +56,12 @@ export const FURNITURE_PRESETS: FurniturePreset[] = [
   // 식탁
   { id: 'table-2',          category: 'table',   name: '2인 식탁',      width: 80,  depth: 80  },
   { id: 'table-4',          category: 'table',   name: '4인 식탁',      width: 120, depth: 80  },
+  // 주방
+  { id: 'fridge',           category: 'kitchen', name: '냉장고',        width: 70,  depth: 70  },
+  { id: 'fridge-mini',      category: 'kitchen', name: '소형 냉장고',   width: 55,  depth: 55  },
+  { id: 'sink-150',         category: 'kitchen', name: '싱크대 150',    width: 150, depth: 60  },
+  { id: 'sink-180',         category: 'kitchen', name: '싱크대 180',    width: 180, depth: 60  },
+  { id: 'washing-machine',  category: 'kitchen', name: '세탁기',        width: 60,  depth: 60  },
   // 소파
   { id: 'sofa-1',           category: 'sofa',    name: '1인 소파',      width: 80,  depth: 85  },
   { id: 'sofa-2',           category: 'sofa',    name: '2인 소파',      width: 140, depth: 85  },

@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react'
+import type { CSSProperties } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
 import { OrbitControls, Html } from '@react-three/drei'
 import type { Room, FurnitureItem, FixedElement, ClearanceWarning } from '../types'
@@ -81,24 +82,7 @@ function FurnitureBlock({ item, hasWarning }: { item: FurnitureItem; hasWarning:
       </mesh>
       {/* Name label */}
       <Html position={[px, H + 0.07, pz]} center style={{ pointerEvents: 'none', userSelect: 'none' }}>
-        <div
-          style={{
-            fontSize: '10px',
-            fontWeight: 600,
-            color: '#fff',
-            backgroundColor: 'rgba(0,0,0,0.6)',
-            padding: '2px 5px',
-            borderRadius: '3px',
-            whiteSpace: 'nowrap',
-            maxWidth: '90px',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            fontFamily: 'Inter, -apple-system, sans-serif',
-            lineHeight: 1.4,
-          }}
-        >
-          {item.name}
-        </div>
+        <div style={LABEL_STYLE}>{item.name}</div>
       </Html>
     </group>
   )
@@ -117,18 +101,40 @@ const FIXED_CFG: Record<string, FixedCfg> = {
   unavailableArea: { color: '#92400e', heightCm: 12,  elevCm: 0,  opacity: 0.7 },
 }
 
+const LABEL_STYLE: CSSProperties = {
+  fontSize: '10px',
+  fontWeight: 600,
+  color: '#fff',
+  backgroundColor: 'rgba(0,0,0,0.6)',
+  padding: '2px 5px',
+  borderRadius: '3px',
+  whiteSpace: 'nowrap',
+  maxWidth: '90px',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  fontFamily: 'Inter, -apple-system, sans-serif',
+  lineHeight: 1.4,
+}
+
 function FixedElement3D({ el }: { el: FixedElement }) {
   const cfg: FixedCfg = FIXED_CFG[el.type] ?? { color: '#6b7280', heightCm: 100, elevCm: 0, opacity: 0.7 }
   const W = u(el.widthCm)
   const D = u(el.depthCm)
   const H = u(cfg.heightCm)
-  const cy = H / 2 + u(cfg.elevCm)
+  const elev = u(cfg.elevCm)
+  const cx = u(el.xCm) + W / 2
+  const cz = u(el.yCm) + D / 2
 
   return (
-    <mesh position={[u(el.xCm) + W / 2, cy, u(el.yCm) + D / 2]}>
-      <boxGeometry args={[W, H, D]} />
-      <meshStandardMaterial color={cfg.color} transparent opacity={cfg.opacity} />
-    </mesh>
+    <group>
+      <mesh position={[cx, H / 2 + elev, cz]}>
+        <boxGeometry args={[W, H, D]} />
+        <meshStandardMaterial color={cfg.color} transparent opacity={cfg.opacity} />
+      </mesh>
+      <Html position={[cx, H + elev + 0.07, cz]} center style={{ pointerEvents: 'none', userSelect: 'none' }}>
+        <div style={LABEL_STYLE}>{el.name}</div>
+      </Html>
+    </group>
   )
 }
 
