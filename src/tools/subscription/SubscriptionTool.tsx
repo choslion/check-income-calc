@@ -323,7 +323,7 @@ export function SubscriptionTool() {
                 className="text-xs font-semibold shrink-0 ml-3"
                 style={{ color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
               >
-                이 구독비를 예산 계산기에 반영하기 →
+                이 구독비를 예산 계산기에 반영하기
               </button>
             </div>
           )}
