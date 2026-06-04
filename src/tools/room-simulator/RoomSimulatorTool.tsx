@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import type { Room, FurnitureItem, FixedElement, Step, LayoutVersion } from './types'
 import { RoomSetup } from './components/RoomSetup'
@@ -8,7 +8,9 @@ import { FixedElementPanel } from './components/FixedElementPanel'
 import { VersionTabs } from './components/VersionTabs'
 import { CompareView } from './components/CompareView'
 import { ResultSummary } from './components/ResultSummary'
-import { ThreePreview } from './components/ThreePreview'
+const ThreePreview = lazy(() =>
+  import('./components/ThreePreview').then(m => ({ default: m.ThreePreview }))
+)
 import {
   getOccupancyPercent,
   getOccupancyStatus,
@@ -407,12 +409,14 @@ export function RoomSimulatorTool() {
 
                 {/* Canvas or 3D preview */}
                 {show3D && furniture.length > 0 ? (
-                  <ThreePreview
-                    room={room}
-                    furniture={furniture}
-                    fixedElements={fixedElements}
-                    warnings={warnings}
-                  />
+                  <Suspense fallback={<ThreeLoadingFallback />}>
+                    <ThreePreview
+                      room={room}
+                      furniture={furniture}
+                      fixedElements={fixedElements}
+                      warnings={warnings}
+                    />
+                  </Suspense>
                 ) : (
                   <RoomCanvas
                     room={room}
@@ -535,12 +539,14 @@ export function RoomSimulatorTool() {
               <ViewToggle label="3D 보기" active={show3D} onClick={() => setShow3D(true)} />
             </div>
             {show3D ? (
-              <ThreePreview
-                room={room}
-                furniture={furniture}
-                fixedElements={fixedElements}
-                warnings={warnings}
-              />
+              <Suspense fallback={<ThreeLoadingFallback />}>
+                <ThreePreview
+                  room={room}
+                  furniture={furniture}
+                  fixedElements={fixedElements}
+                  warnings={warnings}
+                />
+              </Suspense>
             ) : (
               <RoomCanvas
                 room={room}
@@ -564,6 +570,28 @@ export function RoomSimulatorTool() {
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+// ─── ThreeLoadingFallback ─────────────────────────────────────────────────────
+
+function ThreeLoadingFallback() {
+  return (
+    <div
+      style={{
+        width: '100%',
+        aspectRatio: '1',
+        borderRadius: 'var(--radius-card)',
+        backgroundColor: 'var(--surface-card)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'var(--on-dark-mute)',
+        fontSize: '13px',
+      }}
+    >
+      3D 미리보기 불러오는 중…
     </div>
   )
 }
