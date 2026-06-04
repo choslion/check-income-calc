@@ -46,7 +46,7 @@ function BudgetCalculator() {
               Budget Calculator
             </p>
             <h1 className="text-3xl font-bold leading-none" style={{ color: 'var(--on-dark)', letterSpacing: '-0.6px' }}>
-              월급 계산기
+              예산 계산기
             </h1>
           </div>
           <ResetButton />
