@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useEffect, useCallback, Component } from 're
 import type { CSSProperties, ReactNode } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
 import { OrbitControls, Html } from '@react-three/drei'
-import type { Room, FurnitureItem, FixedElement, ClearanceWarning } from '../types'
+import type { Room, FurnitureItem, FixedElement } from '../types'
 import { getFurnitureHeightCm } from '../utils/furniture3dDefaults'
 
 // 1 Three.js unit = 100cm
@@ -91,7 +91,7 @@ function RoomWalls({ room }: { room: Room }) {
 
 // ── Furniture block ───────────────────────────────────────────────────────────
 
-function FurnitureBlock({ item, hasWarning }: { item: FurnitureItem; hasWarning: boolean }) {
+function FurnitureBlock({ item }: { item: FurnitureItem }) {
   const fw = item.rotated ? item.depth : item.width
   const fd = item.rotated ? item.width : item.depth
   const fh = getFurnitureHeightCm(item)
@@ -100,18 +100,17 @@ function FurnitureBlock({ item, hasWarning }: { item: FurnitureItem; hasWarning:
   const H = u(fh)
   const px = u(item.x) + W / 2
   const pz = u(item.y) + D / 2
-  const blockColor = hasWarning ? '#c49a1c' : item.color
 
   return (
     <group>
       <mesh position={[px, H / 2, pz]}>
         <boxGeometry args={[W, H, D]} />
-        <meshStandardMaterial color={blockColor} transparent opacity={0.88} />
+        <meshStandardMaterial color={item.color} transparent opacity={0.88} />
       </mesh>
       {/* Top face highlight */}
       <mesh position={[px, H + 0.001, pz]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[W * 0.97, D * 0.97]} />
-        <meshBasicMaterial color={blockColor} transparent opacity={0.45} />
+        <meshBasicMaterial color={item.color} transparent opacity={0.45} />
       </mesh>
       {/* Name label */}
       <Html position={[px, H + 0.07, pz]} center style={{ pointerEvents: 'none', userSelect: 'none' }}>
@@ -286,16 +285,10 @@ interface ThreePreviewProps {
   room: Room
   furniture: FurnitureItem[]
   fixedElements: FixedElement[]
-  warnings: ClearanceWarning[]
 }
 
-export function ThreePreview({ room, furniture, fixedElements, warnings }: ThreePreviewProps) {
+export function ThreePreview({ room, furniture, fixedElements }: ThreePreviewProps) {
   const [preset, setPreset] = useState<CameraPreset>('iso')
-
-  const warnedIds = useMemo(
-    () => new Set(furniture.filter(f => warnings.some(w => w.id.includes(f.id))).map(f => f.id)),
-    [furniture, warnings]
-  )
 
   const W = u(room.width)
   const D = u(room.height)
@@ -339,7 +332,7 @@ export function ThreePreview({ room, furniture, fixedElements, warnings }: Three
         <RoomBorder room={room} />
         <RoomWalls room={room} />
         {furniture.map(f => (
-          <FurnitureBlock key={f.id} item={f} hasWarning={warnedIds.has(f.id)} />
+          <FurnitureBlock key={f.id} item={f} />
         ))}
         {fixedElements.map(el => (
           <FixedElement3D key={el.id} el={el} />

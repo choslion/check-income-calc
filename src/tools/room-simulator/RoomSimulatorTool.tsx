@@ -436,7 +436,6 @@ export function RoomSimulatorTool() {
                       room={room}
                       furniture={furniture}
                       fixedElements={fixedElements}
-                      warnings={warnings}
                     />
                   </Suspense>
                 ) : (
