@@ -67,7 +67,7 @@ function RoomFloorOutline({ room }: { room: Room }) {
   const points: [number, number, number][] = [
     [0, y, 0], [W, y, 0], [W, y, D], [0, y, D], [0, y, 0],
   ]
-  return <Line points={points} color="#7ab8ff" lineWidth={2} />
+  return <Line points={points} color="#7ab8ff" lineWidth={1.5} />
 }
 
 // ── Corner vertical lines ──────────────────────────────────────────────────────
