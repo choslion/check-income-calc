@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Plus, Pencil, Trash2, Check, RotateCcw, X, ChevronDown } from 'lucide-react'
+import { getBudgetSalary } from '../../lib/crossToolData'
 import type { Subscription, SubscriptionCategory, SubscriptionStatus } from './types'
 import { SUBSCRIPTION_CATEGORIES } from './types'
 import { loadSubscriptions, saveSubscriptions } from './storage'
@@ -84,6 +86,8 @@ function inputStyle(hasError: boolean) {
 }
 
 export function SubscriptionTool() {
+  const navigate = useNavigate()
+  const [budgetSalary] = useState(() => getBudgetSalary())
   const [subs, setSubs] = useState<Subscription[]>(() => loadSubscriptions())
   const [name, setName] = useState('')
   const [amount, setAmount] = useState('')
@@ -298,6 +302,25 @@ export function SubscriptionTool() {
               </p>
             </div>
           </div>
+
+          {/* Budget ratio row */}
+          {budgetSalary > 0 && totals.monthlyTotal > 0 && (
+            <div
+              className="flex items-center justify-between mt-3 pt-3"
+              style={{ borderTop: '1px solid var(--hairline)' }}
+            >
+              <span className="text-xs" style={{ color: 'var(--on-dark-mute)' }}>
+                월 예산의 {((totals.monthlyTotal / budgetSalary) * 100).toFixed(1)}% 차지
+              </span>
+              <button
+                onClick={() => navigate('/tools/budget')}
+                className="text-xs font-semibold"
+                style={{ color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              >
+                예산 계산기 →
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Category breakdown */}
