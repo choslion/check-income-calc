@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Trash2 } from 'lucide-react'
 import type { ExpenseItem as ExpenseItemType } from '../types'
 import { formatKRW, parseAmount } from '../lib/calc'
@@ -13,6 +13,11 @@ interface Props {
 export function ExpenseItem({ item, salary, onUpdate, onDelete }: Props) {
   const [amountRaw, setAmountRaw] = useState(item.amount > 0 ? formatKRW(item.amount) : '')
   const [touched, setTouched] = useState(false)
+
+  // Sync display value when amount is updated externally (e.g. subscription import)
+  useEffect(() => {
+    setAmountRaw(item.amount > 0 ? formatKRW(item.amount) : '')
+  }, [item.amount])
 
   const showNameError = touched && item.name.trim() === '' && item.amount > 0
 

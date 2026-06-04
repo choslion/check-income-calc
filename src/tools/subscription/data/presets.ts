@@ -20,7 +20,7 @@ export const QUICK_ADD_PRESETS: SubPreset[] = [
   { name: '왓챠',           suggestedPrice:  7900, cycle: 'monthly', category: 'OTT' },
   { name: '웨이브',         suggestedPrice:  7900, cycle: 'monthly', category: 'OTT' },
   { name: '쿠팡플레이',     suggestedPrice:  4990, cycle: 'monthly', category: 'OTT' },
-  { name: '라프텔',         suggestedPrice:  8900, cycle: 'monthly', category: 'OTT' },
+  { name: '라프텔',         suggestedPrice:  9900, cycle: 'monthly', category: 'OTT' },
   { name: '디즈니+',        suggestedPrice:  9900, cycle: 'monthly', category: 'OTT' },
   { name: '애플 TV+',       suggestedPrice:  9900, cycle: 'monthly', category: 'OTT' },
   { name: '유튜브 프리미엄', suggestedPrice: 14900, cycle: 'monthly', category: 'OTT' },
