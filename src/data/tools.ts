@@ -49,7 +49,7 @@ export const TOOLS: Tool[] = [
     description: '매달 나가는 구독료를 한눈에 정리하고 연간 비용을 확인하세요.',
     path: '/tools/subscription',
     category: 'money',
-    status: 'coming-soon',
+    status: 'available',
   },
   {
     id: 'savings-goal',
