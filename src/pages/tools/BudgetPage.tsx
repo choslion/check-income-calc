@@ -33,6 +33,7 @@ function ResetButton() {
 
 function BudgetCalculator() {
   useEffect(() => {
+    document.title = '예산 계산기 · 생활계산소'
     recordToolUsage('budget')
   }, [])
 

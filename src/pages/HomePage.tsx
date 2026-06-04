@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
 import { TOOLS, getToolById } from '../data/tools'
@@ -117,6 +118,7 @@ function RecentToolCard() {
 }
 
 export default function HomePage() {
+  useEffect(() => { document.title = '생활계산소' }, [])
   const navigate = useNavigate()
   const featuredTools = TOOLS.filter(t => t.status === 'available').slice(0, 2)
   const comingSoon = TOOLS.filter(t => t.status === 'coming-soon').slice(0, 3)

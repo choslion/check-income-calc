@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { TOOLS, CATEGORY_LABELS, type ToolCategory } from '../data/tools'
 import { ToolSection } from '../components/tools/ToolSection'
 import { AdBannerSlot } from '../components/ads/AdBannerSlot'
@@ -8,6 +9,7 @@ const availableTools = TOOLS.filter(t => t.status === 'available')
 const comingSoonTools = TOOLS.filter(t => t.status === 'coming-soon')
 
 export default function ToolsPage() {
+  useEffect(() => { document.title = '도구 목록 · 생활계산소' }, [])
   return (
     <div className="px-4 py-8">
       <div className="max-w-xl mx-auto space-y-8">
