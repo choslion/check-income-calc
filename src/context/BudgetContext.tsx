@@ -14,6 +14,7 @@ type Action =
   | { type: 'UPDATE_VARIABLE_EXPENSE'; payload: ExpenseItem }
   | { type: 'DELETE_FIXED_EXPENSE'; payload: string }
   | { type: 'DELETE_VARIABLE_EXPENSE'; payload: string }
+  | { type: 'UPSERT_SUBSCRIPTION_EXPENSE'; payload: number }
   | { type: 'RESET' }
 
 function clampAmount(n: number): number {
@@ -83,6 +84,25 @@ function reducer(state: BudgetState, action: Action): BudgetState {
         ...state,
         variableExpenses: state.variableExpenses.filter((e) => e.id !== action.payload),
       }
+
+    case 'UPSERT_SUBSCRIPTION_EXPENSE': {
+      const existing = state.fixedExpenses.find((e) => e.source === 'subscription')
+      if (existing) {
+        return {
+          ...state,
+          fixedExpenses: state.fixedExpenses.map((e) =>
+            e.source === 'subscription' ? { ...e, amount: clampAmount(action.payload) } : e
+          ),
+        }
+      }
+      return {
+        ...state,
+        fixedExpenses: [
+          ...state.fixedExpenses,
+          { id: crypto.randomUUID(), name: '구독비', amount: clampAmount(action.payload), source: 'subscription' },
+        ],
+      }
+    }
 
     case 'RESET':
       return loadState()

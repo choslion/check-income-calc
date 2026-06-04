@@ -303,21 +303,27 @@ export function SubscriptionTool() {
             </div>
           </div>
 
-          {/* Budget ratio row */}
-          {budgetSalary > 0 && totals.monthlyTotal > 0 && (
+          {/* Budget ratio + CTA */}
+          {totals.monthlyTotal > 0 && (
             <div
-              className="flex items-center justify-between mt-3 pt-3"
+              className="mt-3 pt-3 flex items-center justify-between"
               style={{ borderTop: '1px solid var(--hairline)' }}
             >
-              <span className="text-xs" style={{ color: 'var(--on-dark-mute)' }}>
-                월 예산의 {((totals.monthlyTotal / budgetSalary) * 100).toFixed(1)}% 차지
-              </span>
+              {budgetSalary > 0 ? (
+                <span className="text-xs" style={{ color: 'var(--on-dark-mute)' }}>
+                  월 예산의 {((totals.monthlyTotal / budgetSalary) * 100).toFixed(1)}% 차지
+                </span>
+              ) : (
+                <span className="text-xs" style={{ color: 'var(--on-dark-mute)' }}>
+                  예산 계산기에 구독비를 반영해보세요
+                </span>
+              )}
               <button
                 onClick={() => navigate('/tools/budget')}
-                className="text-xs font-semibold"
+                className="text-xs font-semibold shrink-0 ml-3"
                 style={{ color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
               >
-                예산 계산기 →
+                이 구독비를 예산 계산기에 반영하기 →
               </button>
             </div>
           )}

@@ -42,6 +42,12 @@ export function ExpenseList({ type }: Props) {
     })
   }
 
+  function handleImportSubscription() {
+    dispatch({ type: 'UPSERT_SUBSCRIPTION_EXPENSE', payload: Math.round(subSummary.monthlyTotal) })
+  }
+
+  const importedItem = type === 'fixed' ? state.fixedExpenses.find(e => e.source === 'subscription') : undefined
+
   return (
     <div style={{ backgroundColor: 'var(--surface-card)', borderRadius: 'var(--radius-card)', padding: '24px' }}>
       <div className="flex items-center justify-between mb-4">
@@ -66,35 +72,44 @@ export function ExpenseList({ type }: Props) {
           />
         ))}
 
-        {/* Subscription sync row */}
+        {/* Subscription import CTA */}
         {type === 'fixed' && subSummary.count > 0 && (
           <div
-            className="flex items-center justify-between px-3 py-2.5 cursor-pointer transition-colors"
+            className="flex flex-col gap-2.5 p-3"
             style={{ backgroundColor: 'var(--surface-input)', borderRadius: 'var(--radius-input)', border: '1px solid var(--hairline)' }}
-            onClick={() => navigate('/tools/subscription')}
-            onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'var(--primary)')}
-            onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--hairline)')}
           >
-            <div className="flex items-center gap-2">
-              <span className="text-sm" style={{ color: 'var(--on-dark)' }}>구독 서비스</span>
-              <span
-                className="text-xs px-1.5 py-0.5"
-                style={{ backgroundColor: 'var(--surface-card)', color: 'var(--primary)', borderRadius: 'var(--radius-pill)', fontSize: 10, border: '1px solid var(--hairline)' }}
-              >
-                자동 연동 · {subSummary.count}개
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-sm font-semibold" style={{ color: 'var(--on-dark)', fontFamily: 'var(--font-number)' }}>
+            <p className="text-xs" style={{ color: 'var(--on-dark-mute)', lineHeight: 1.5 }}>
+              구독 계산기에서 계산된 월 구독비{' '}
+              <span className="font-semibold" style={{ color: 'var(--on-dark)', fontFamily: 'var(--font-number)' }}>
                 {formatKRW(Math.round(subSummary.monthlyTotal))}원
               </span>
-              <ChevronRight size={13} style={{ color: 'var(--on-dark-mute)' }} />
+              을 불러올 수 있습니다.
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={handleImportSubscription}
+                className="flex-1 text-xs font-semibold py-1.5"
+                style={{ backgroundColor: 'var(--primary)', color: 'var(--on-primary)', borderRadius: 'var(--radius-pill)', border: 'none', cursor: 'pointer' }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary-hover)')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary)')}
+              >
+                {importedItem ? '구독비 업데이트' : '구독비 불러오기'}
+              </button>
+              <button
+                onClick={() => navigate('/tools/subscription')}
+                className="text-xs font-semibold px-3 py-1.5 shrink-0"
+                style={{ backgroundColor: 'transparent', color: 'var(--primary)', borderRadius: 'var(--radius-pill)', border: '1px solid var(--hairline)', cursor: 'pointer' }}
+                onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'var(--primary)')}
+                onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--hairline)')}
+              >
+                구독 계산기 →
+              </button>
             </div>
           </div>
         )}
 
-        {/* Suggestion when no subscription data and many fixed expenses */}
-        {type === 'fixed' && subSummary.count === 0 && validItems.length >= 4 && (
+        {/* Suggestion when no subscription data */}
+        {type === 'fixed' && subSummary.count === 0 && (
           <button
             onClick={() => navigate('/tools/subscription')}
             className="w-full flex items-center justify-between text-xs px-3 py-2.5"
@@ -102,7 +117,7 @@ export function ExpenseList({ type }: Props) {
             onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'var(--primary)')}
             onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--hairline)')}
           >
-            <span>넷플릭스·유튜브 등 구독 서비스가 있다면 구독 계산기를 이용해보세요</span>
+            <span>매달 빠져나가는 구독이 많다면 구독 계산기에서 먼저 정리해 보세요.</span>
             <ChevronRight size={12} style={{ color: 'var(--primary)', flexShrink: 0, marginLeft: 8 }} />
           </button>
         )}
