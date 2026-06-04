@@ -1,5 +1,5 @@
-import { useState, useMemo, useRef, useEffect, useCallback } from 'react'
-import type { CSSProperties } from 'react'
+import { useState, useMemo, useRef, useEffect, useCallback, Component } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
 import { OrbitControls, Html } from '@react-three/drei'
 import type { Room, FurnitureItem, FixedElement, ClearanceWarning } from '../types'
@@ -232,6 +232,54 @@ function CameraRig({ preset, cx, cz, maxDim }: CameraRigProps) {
   )
 }
 
+// ── Error boundary ────────────────────────────────────────────────────────────
+
+class CanvasErrorBoundary extends Component<
+  { children: ReactNode },
+  { failed: boolean }
+> {
+  constructor(props: { children: ReactNode }) {
+    super(props)
+    this.state = { failed: false }
+  }
+
+  static getDerivedStateFromError(): { failed: boolean } {
+    return { failed: true }
+  }
+
+  render() {
+    if (this.state.failed) {
+      return (
+        <div
+          style={{
+            width: '100%',
+            aspectRatio: '1',
+            borderRadius: 'var(--radius-card)',
+            backgroundColor: 'var(--surface-card)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            padding: '24px',
+            textAlign: 'center',
+          }}
+        >
+          <p style={{ color: 'var(--on-dark)', fontSize: '14px', fontWeight: 600 }}>
+            3D 미리보기를 불러올 수 없습니다
+          </p>
+          <p style={{ color: 'var(--on-dark-mute)', fontSize: '13px', lineHeight: 1.6 }}>
+            현재 기기에서 3D 미리보기를 불러오지 못했습니다.
+            <br />
+            2D 배치 화면을 이용해 주세요.
+          </p>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
 // ── ThreePreview ──────────────────────────────────────────────────────────────
 
 interface ThreePreviewProps {
@@ -269,6 +317,7 @@ export function ThreePreview({ room, furniture, fixedElements, warnings }: Three
   ]
 
   return (
+    <CanvasErrorBoundary>
     <div
       style={{
         position: 'relative',
@@ -348,5 +397,6 @@ export function ThreePreview({ room, furniture, fixedElements, warnings }: Three
         ))}
       </div>
     </div>
+    </CanvasErrorBoundary>
   )
 }
