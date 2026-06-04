@@ -301,7 +301,29 @@ export function RoomSimulatorTool() {
         {step === 'room' && (
           <RoomSetup
             room={room}
-            onRoomChange={r => patchActive({ room: r })}
+            onRoomChange={r => {
+              const dimensionsChanged = r.width !== room.width || r.height !== room.height
+              if (!dimensionsChanged) {
+                patchActive({ room: r })
+                return
+              }
+              // Clamp furniture and fixed elements into the new room bounds
+              const clampedFurniture = furniture.map(f => {
+                const fw = f.rotated ? f.depth : f.width
+                const fd = f.rotated ? f.width : f.depth
+                return {
+                  ...f,
+                  x: Math.max(0, Math.min(f.x, r.width - fw)),
+                  y: Math.max(0, Math.min(f.y, r.height - fd)),
+                }
+              })
+              const clampedFixed = fixedElements.map(el => ({
+                ...el,
+                xCm: Math.max(0, Math.min(el.xCm, r.width - el.widthCm)),
+                yCm: Math.max(0, Math.min(el.yCm, r.height - el.depthCm)),
+              }))
+              patchActive({ room: r, furnitureList: clampedFurniture, fixedElements: clampedFixed })
+            }}
             onNext={() => setStep('furniture')}
           />
         )}
