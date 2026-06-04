@@ -97,12 +97,12 @@ export function ExpenseList({ type }: Props) {
               </button>
               <button
                 onClick={() => navigate('/tools/subscription')}
-                className="text-xs font-semibold px-3 py-1.5 shrink-0"
+                className="flex items-center text-xs font-semibold px-3 py-1.5 shrink-0"
                 style={{ backgroundColor: 'transparent', color: 'var(--primary)', borderRadius: 'var(--radius-pill)', border: '1px solid var(--hairline)', cursor: 'pointer' }}
                 onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'var(--primary)')}
                 onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--hairline)')}
               >
-                구독 계산기 →
+                구독 계산기 <ChevronRight size={12} style={{ marginLeft: 2 }} />
               </button>
             </div>
           </div>

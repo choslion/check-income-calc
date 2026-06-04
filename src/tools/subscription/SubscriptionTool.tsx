@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Pencil, Trash2, Check, RotateCcw, X, ChevronDown } from 'lucide-react'
+import { Plus, Pencil, Trash2, Check, RotateCcw, X, ChevronDown, ChevronRight } from 'lucide-react'
 import { getBudgetSalary } from '../../lib/crossToolData'
 import type { Subscription, SubscriptionCategory, SubscriptionStatus } from './types'
 import { SUBSCRIPTION_CATEGORIES } from './types'
@@ -320,10 +320,11 @@ export function SubscriptionTool() {
               )}
               <button
                 onClick={() => navigate('/tools/budget')}
-                className="text-xs font-semibold shrink-0 ml-3"
+                className="flex items-center gap-0.5 text-xs font-semibold shrink-0 ml-3"
                 style={{ color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
               >
                 이 구독비를 예산 계산기에 반영하기
+                <ChevronRight size={12} />
               </button>
             </div>
           )}
