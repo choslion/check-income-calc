@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef, useEffect, useCallback, Component } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
-import { OrbitControls, Html } from '@react-three/drei'
+import { OrbitControls, Html, Line } from '@react-three/drei'
 import type { Room, FurnitureItem, FixedElement, ClearanceWarning } from '../types'
 import { getFurnitureHeightCm } from '../utils/furniture3dDefaults'
 
@@ -31,10 +31,10 @@ function RoomFloor({ room }: { room: Room }) {
 function RoomBorder({ room }: { room: Room }) {
   const W = u(room.width)
   const D = u(room.height)
-  const thick = u(3)   // 3cm border strip width
-  const bh = u(4)      // 4cm border strip height
-  const by = bh / 2    // Y center = sits on floor
-  const color = '#3a5274'
+  const thick = u(4)
+  const bh = u(6)
+  const by = bh / 2
+  const color = '#4d8ad6'
 
   return (
     <>
@@ -56,6 +56,18 @@ function RoomBorder({ room }: { room: Room }) {
       </mesh>
     </>
   )
+}
+
+// ── Floor perimeter outline ────────────────────────────────────────────────────
+
+function RoomFloorOutline({ room }: { room: Room }) {
+  const W = u(room.width)
+  const D = u(room.height)
+  const y = 0.005
+  const points: [number, number, number][] = [
+    [0, y, 0], [W, y, 0], [W, y, D], [0, y, D], [0, y, 0],
+  ]
+  return <Line points={points} color="#7ab8ff" lineWidth={2} />
 }
 
 // ── Walls ─────────────────────────────────────────────────────────────────────
@@ -331,6 +343,7 @@ export function ThreePreview({ room, furniture, fixedElements }: ThreePreviewPro
         <directionalLight position={[-3, 5, -3]} intensity={0.25} />
         <RoomFloor room={room} />
         <RoomBorder room={room} />
+        <RoomFloorOutline room={room} />
         <RoomWalls room={room} />
         {furniture.map(f => (
           <FurnitureBlock key={f.id} item={f} />
