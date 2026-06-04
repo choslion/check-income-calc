@@ -51,52 +51,27 @@ export function ExpenseItem({ item, salary, onUpdate, onDelete }: Props) {
   }
 
   return (
-    <div>
-      <div className="flex gap-2 items-start">
-        <div className="flex-1">
-          <input
-            type="text"
-            value={item.name}
-            onChange={handleNameChange}
-            onBlur={handleNameBlur}
-            placeholder="항목명"
-            maxLength={30}
-            className="w-full px-3 py-2.5 text-sm font-medium outline-none transition-all"
-            style={{
-              ...inputStyle,
-              borderColor: showNameError ? 'var(--danger)' : 'var(--hairline)',
-            }}
-            onFocus={(e) => (e.target.style.borderColor = 'var(--info)')}
-            onBlurCapture={(e) => (e.target.style.borderColor = showNameError ? 'var(--danger)' : 'var(--hairline)')}
-          />
-          {showNameError && (
-            <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>
-              항목명을 입력해주세요
-            </p>
-          )}
-        </div>
-
-        <div className="relative w-36">
-          <input
-            type="text"
-            inputMode="numeric"
-            value={amountRaw}
-            onChange={handleAmountChange}
-            onBlur={handleAmountBlur}
-            placeholder="0"
-            className="w-full px-3 py-2.5 pr-8 text-right text-sm font-medium outline-none transition-all"
-            style={{ ...inputStyle, fontFamily: 'var(--font-number)' }}
-            onFocus={(e) => (e.target.style.borderColor = 'var(--info)')}
-            onBlurCapture={(e) => (e.target.style.borderColor = 'var(--hairline)')}
-          />
-          <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--muted)' }}>
-            원
-          </span>
-        </div>
-
+    <div className="flex flex-col gap-1.5">
+      {/* Row 1: 항목명 + 삭제 */}
+      <div className="flex gap-2 items-center">
+        <input
+          type="text"
+          value={item.name}
+          onChange={handleNameChange}
+          onBlur={handleNameBlur}
+          placeholder="항목명"
+          maxLength={30}
+          className="flex-1 min-w-0 px-3 py-2 text-sm font-medium outline-none transition-all"
+          style={{
+            ...inputStyle,
+            borderColor: showNameError ? 'var(--danger)' : 'var(--hairline)',
+          }}
+          onFocus={(e) => (e.target.style.borderColor = 'var(--info)')}
+          onBlurCapture={(e) => (e.target.style.borderColor = showNameError ? 'var(--danger)' : 'var(--hairline)')}
+        />
         <button
           onClick={() => onDelete(item.id)}
-          className="p-2.5 shrink-0 transition-colors"
+          className="p-2 shrink-0 transition-colors"
           style={{ color: 'var(--on-dark-mute)', backgroundColor: 'var(--surface-input)', borderRadius: 'var(--radius-input)' }}
           onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--danger)')}
           onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--on-dark-mute)')}
@@ -106,23 +81,49 @@ export function ExpenseItem({ item, salary, onUpdate, onDelete }: Props) {
         </button>
       </div>
 
-      {/* 비율 바 */}
-      {showRatioBar && (
-        <div className="mt-1.5 flex items-center gap-2 px-0.5">
-          <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--surface-input)' }}>
-            <div
-              className="h-full rounded-full transition-all duration-300"
-              style={{
-                width: `${Math.min(ratio, 100)}%`,
-                backgroundColor: ratio > 30 ? 'var(--danger)' : ratio > 15 ? '#f59e0b' : 'var(--success)',
-              }}
-            />
-          </div>
-          <span className="text-xs shrink-0" style={{ color: 'var(--muted)', fontFamily: 'var(--font-number)', minWidth: '36px', textAlign: 'right' }}>
-            {ratio.toFixed(1)}%
+      {showNameError && (
+        <p className="text-xs -mt-1" style={{ color: 'var(--danger)' }}>
+          항목명을 입력해주세요
+        </p>
+      )}
+
+      {/* Row 2: 금액 + 비율 바 */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <input
+            type="text"
+            inputMode="numeric"
+            value={amountRaw}
+            onChange={handleAmountChange}
+            onBlur={handleAmountBlur}
+            placeholder="0"
+            className="w-full px-3 py-2 pr-8 text-right text-sm font-medium outline-none transition-all"
+            style={{ ...inputStyle, fontFamily: 'var(--font-number)' }}
+            onFocus={(e) => (e.target.style.borderColor = 'var(--info)')}
+            onBlurCapture={(e) => (e.target.style.borderColor = 'var(--hairline)')}
+          />
+          <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--muted)' }}>
+            원
           </span>
         </div>
-      )}
+
+        {showRatioBar && (
+          <div className="flex items-center gap-1.5 shrink-0" style={{ width: '80px' }}>
+            <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--surface-input)' }}>
+              <div
+                className="h-full rounded-full transition-all duration-300"
+                style={{
+                  width: `${Math.min(ratio, 100)}%`,
+                  backgroundColor: ratio > 30 ? 'var(--danger)' : ratio > 15 ? '#f59e0b' : 'var(--success)',
+                }}
+              />
+            </div>
+            <span className="text-xs shrink-0" style={{ color: 'var(--muted)', fontFamily: 'var(--font-number)', minWidth: '32px', textAlign: 'right' }}>
+              {ratio.toFixed(1)}%
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
