@@ -16,21 +16,20 @@ export const ROOM_PRESETS: RoomPreset[] = [
   { id: 'living', label: '작은 거실 예시', width: 400, height: 500, description: '소파·TV장 배치 예시예요' },
 ]
 
-export type FurnitureCategory = 'bed' | 'desk' | 'table' | 'kitchen' | 'sofa' | 'storage' | 'living' | 'bedroom'
+export type FurnitureCategory = 'bed' | 'desk' | 'table' | 'kitchen' | 'sofa' | 'storage' | 'living'
 
 export const CATEGORY_LABELS: Record<FurnitureCategory, string> = {
-  bed: '침대',
+  bed: '침실',
   desk: '책상',
   table: '식탁',
   kitchen: '주방',
   sofa: '소파',
   storage: '수납',
   living: '거실',
-  bedroom: '침실',
 }
 
 export const FURNITURE_CATEGORIES: FurnitureCategory[] = [
-  'bed', 'desk', 'table', 'kitchen', 'sofa', 'storage', 'living', 'bedroom',
+  'bed', 'desk', 'table', 'kitchen', 'sofa', 'storage', 'living',
 ]
 
 export interface FurniturePreset {
@@ -74,8 +73,8 @@ export const FURNITURE_PRESETS: FurniturePreset[] = [
   { id: 'drawer',           category: 'storage', name: '서랍장',        width: 80,  depth: 45  },
   // 거실
   { id: 'tv-unit',          category: 'living',  name: 'TV장',          width: 150, depth: 40  },
-  // 침실
-  { id: 'bedside',          category: 'bedroom', name: '협탁',          width: 45,  depth: 40  },
+  // 침실 accessories
+  { id: 'bedside',          category: 'bed',     name: '협탁',          width: 45,  depth: 40  },
 ]
 
 export function getFurniturePresetsByCategory(cat: FurnitureCategory): FurniturePreset[] {
