@@ -363,7 +363,6 @@ export function ThreePreview({ room, furniture, fixedElements }: ThreePreviewPro
         <directionalLight position={[5, 8, 5]} intensity={0.6} />
         <directionalLight position={[-3, 5, -3]} intensity={0.25} />
         <RoomFloor room={room} />
-        <RoomBorder room={room} />
         <RoomFloorOutline room={room} />
         <RoomCornerLines room={room} />
         <RoomWalls room={room} />
