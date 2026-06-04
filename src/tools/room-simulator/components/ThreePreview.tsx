@@ -17,11 +17,44 @@ function u(cm: number): number {
 function RoomFloor({ room }: { room: Room }) {
   const w = u(room.width)
   const d = u(room.height)
+  // Use a thin box (not planeGeometry) so the floor is visible from all camera angles
   return (
-    <mesh position={[w / 2, 0, d / 2]} rotation={[-Math.PI / 2, 0, 0]}>
-      <planeGeometry args={[w, d]} />
-      <meshStandardMaterial color="#151c28" />
+    <mesh position={[w / 2, -0.003, d / 2]}>
+      <boxGeometry args={[w, 0.006, d]} />
+      <meshStandardMaterial color="#1e2d42" />
     </mesh>
+  )
+}
+
+// ── Room perimeter border ─────────────────────────────────────────────────────
+
+function RoomBorder({ room }: { room: Room }) {
+  const W = u(room.width)
+  const D = u(room.height)
+  const thick = u(3)   // 3cm border strip width
+  const bh = u(4)      // 4cm border strip height
+  const by = bh / 2    // Y center = sits on floor
+  const color = '#3a5274'
+
+  return (
+    <>
+      <mesh position={[W / 2, by, 0]}>
+        <boxGeometry args={[W + thick * 2, bh, thick]} />
+        <meshStandardMaterial color={color} />
+      </mesh>
+      <mesh position={[W / 2, by, D]}>
+        <boxGeometry args={[W + thick * 2, bh, thick]} />
+        <meshStandardMaterial color={color} />
+      </mesh>
+      <mesh position={[0, by, D / 2]}>
+        <boxGeometry args={[thick, bh, D]} />
+        <meshStandardMaterial color={color} />
+      </mesh>
+      <mesh position={[W, by, D / 2]}>
+        <boxGeometry args={[thick, bh, D]} />
+        <meshStandardMaterial color={color} />
+      </mesh>
+    </>
   )
 }
 
@@ -38,19 +71,19 @@ function RoomWalls({ room }: { room: Room }) {
     <>
       <mesh position={[W / 2, hy, 0]}>
         <boxGeometry args={[W + wt * 2, wh, wt]} />
-        <meshStandardMaterial color="#2a3448" transparent opacity={0.4} />
+        <meshStandardMaterial color="#2a3448" transparent opacity={0.4} depthWrite={false} />
       </mesh>
       <mesh position={[W / 2, hy, D]}>
         <boxGeometry args={[W + wt * 2, wh, wt]} />
-        <meshStandardMaterial color="#2a3448" transparent opacity={0.4} />
+        <meshStandardMaterial color="#2a3448" transparent opacity={0.4} depthWrite={false} />
       </mesh>
       <mesh position={[0, hy, D / 2]}>
         <boxGeometry args={[wt, wh, D]} />
-        <meshStandardMaterial color="#2a3448" transparent opacity={0.4} />
+        <meshStandardMaterial color="#2a3448" transparent opacity={0.4} depthWrite={false} />
       </mesh>
       <mesh position={[W, hy, D / 2]}>
         <boxGeometry args={[wt, wh, D]} />
-        <meshStandardMaterial color="#2a3448" transparent opacity={0.4} />
+        <meshStandardMaterial color="#2a3448" transparent opacity={0.4} depthWrite={false} />
       </mesh>
     </>
   )
@@ -116,10 +149,23 @@ const LABEL_STYLE: CSSProperties = {
   lineHeight: 1.4,
 }
 
+// Minimum 3D render thickness for wall-mounted elements (WALL_DEPTH_CM=8 is too thin to see)
+const MIN_WALL_THICKNESS_CM = 25
+
 function FixedElement3D({ el }: { el: FixedElement }) {
   const cfg: FixedCfg = FIXED_CFG[el.type] ?? { color: '#6b7280', heightCm: 100, elevCm: 0, opacity: 0.7 }
-  const W = u(el.widthCm)
-  const D = u(el.depthCm)
+
+  // Expand the thin wall-perpendicular axis so the element is always visible
+  let widthCm = el.widthCm
+  let depthCm = el.depthCm
+  if (el.wallSide === 'top' || el.wallSide === 'bottom') {
+    depthCm = Math.max(depthCm, MIN_WALL_THICKNESS_CM)
+  } else if (el.wallSide === 'left' || el.wallSide === 'right') {
+    widthCm = Math.max(widthCm, MIN_WALL_THICKNESS_CM)
+  }
+
+  const W = u(widthCm)
+  const D = u(depthCm)
   const H = u(cfg.heightCm)
   const elev = u(cfg.elevCm)
   const cx = u(el.xCm) + W / 2
@@ -129,7 +175,7 @@ function FixedElement3D({ el }: { el: FixedElement }) {
     <group>
       <mesh position={[cx, H / 2 + elev, cz]}>
         <boxGeometry args={[W, H, D]} />
-        <meshStandardMaterial color={cfg.color} transparent opacity={cfg.opacity} />
+        <meshStandardMaterial color={cfg.color} transparent opacity={cfg.opacity} depthWrite={false} />
       </mesh>
       <Html position={[cx, H + elev + 0.07, cz]} center style={{ pointerEvents: 'none', userSelect: 'none' }}>
         <div style={LABEL_STYLE}>{el.name}</div>
@@ -241,6 +287,7 @@ export function ThreePreview({ room, furniture, fixedElements, warnings }: Three
         <directionalLight position={[5, 8, 5]} intensity={0.6} />
         <directionalLight position={[-3, 5, -3]} intensity={0.25} />
         <RoomFloor room={room} />
+        <RoomBorder room={room} />
         <RoomWalls room={room} />
         {furniture.map(f => (
           <FurnitureBlock key={f.id} item={f} hasWarning={warnedIds.has(f.id)} />
