@@ -468,6 +468,13 @@ function FixedElementRect({ el, scale, room, readonly, showFixedElementLabels, o
   const pxH = el.depthCm * scale
   const showLabel = showFixedElementLabels && pxW > 24 && pxH > 14
 
+  // Minimum touch target: 32px. Expand outward from the visual center.
+  const MIN_TOUCH = 32
+  const hitW = Math.max(pxW, MIN_TOUCH)
+  const hitH = Math.max(pxH, MIN_TOUCH)
+  const hitOffX = (hitW - pxW) / 2
+  const hitOffY = (hitH - pxH) / 2
+
   return (
     <>
       {/* Door clearance zone */}
@@ -487,7 +494,7 @@ function FixedElementRect({ el, scale, room, readonly, showFixedElementLabels, o
         />
       )}
 
-      {/* Element body */}
+      {/* Transparent touch-target wrapper (min 32×32px) */}
       <div
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
@@ -495,47 +502,58 @@ function FixedElementRect({ el, scale, room, readonly, showFixedElementLabels, o
         onClick={e => e.stopPropagation()}
         style={{
           position: 'absolute',
-          left: el.xCm * scale,
-          top: el.yCm * scale,
-          width: pxW,
-          height: pxH,
-          backgroundColor: isWall ? color + 'cc' : color + '30',
-          backgroundImage: isWall
-            ? 'none'
-            : `repeating-linear-gradient(45deg, ${color}28 0, ${color}28 3px, transparent 3px, transparent 9px)`,
-          border: `2px solid ${color}`,
+          left: el.xCm * scale - hitOffX,
+          top: el.yCm * scale - hitOffY,
+          width: hitW,
+          height: hitH,
           cursor: draggable ? 'grab' : 'default',
           zIndex: 2,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          overflow: 'hidden',
           touchAction: 'none',
-          borderRadius: isWall ? 2 : 3,
-          padding: '2px 3px',
         }}
       >
-        {showLabel && (
-          <span
-            style={{
-              fontSize: Math.min(11, Math.max(7, Math.min(pxW, pxH) / 2.5)),
-              color: isWall ? '#fff' : color,
-              fontWeight: 700,
-              textAlign: 'center',
-              pointerEvents: 'none',
-              userSelect: 'none',
-              textShadow: isWall ? '0 1px 3px rgba(0,0,0,0.9)' : 'none',
-              maxWidth: '100%',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              lineHeight: 1.25,
-            }}
-          >
-            {el.name}
-          </span>
-        )}
+        {/* Visual element — actual size, centred in the touch area */}
+        <div
+          style={{
+            position: 'absolute',
+            left: hitOffX,
+            top: hitOffY,
+            width: pxW,
+            height: pxH,
+            backgroundColor: isWall ? color + 'cc' : color + '30',
+            backgroundImage: isWall
+              ? 'none'
+              : `repeating-linear-gradient(45deg, ${color}28 0, ${color}28 3px, transparent 3px, transparent 9px)`,
+            border: `2px solid ${color}`,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden',
+            borderRadius: isWall ? 2 : 3,
+            padding: '2px 3px',
+          }}
+        >
+          {showLabel && (
+            <span
+              style={{
+                fontSize: Math.min(11, Math.max(7, Math.min(pxW, pxH) / 2.5)),
+                color: isWall ? '#fff' : color,
+                fontWeight: 700,
+                textAlign: 'center',
+                pointerEvents: 'none',
+                userSelect: 'none',
+                textShadow: isWall ? '0 1px 3px rgba(0,0,0,0.9)' : 'none',
+                maxWidth: '100%',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                lineHeight: 1.25,
+              }}
+            >
+              {el.name}
+            </span>
+          )}
+        </div>
       </div>
     </>
   )
