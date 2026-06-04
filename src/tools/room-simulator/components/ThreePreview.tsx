@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
+import { OrbitControls, Html } from '@react-three/drei'
 import type { Room, FurnitureItem, FixedElement, ClearanceWarning } from '../types'
 import { getFurnitureHeightCm } from '../utils/furniture3dDefaults'
 
@@ -79,6 +79,27 @@ function FurnitureBlock({ item, hasWarning }: { item: FurnitureItem; hasWarning:
         <planeGeometry args={[W * 0.97, D * 0.97]} />
         <meshBasicMaterial color={blockColor} transparent opacity={0.45} />
       </mesh>
+      {/* Name label */}
+      <Html position={[px, H + 0.07, pz]} center style={{ pointerEvents: 'none', userSelect: 'none' }}>
+        <div
+          style={{
+            fontSize: '10px',
+            fontWeight: 600,
+            color: '#fff',
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            padding: '2px 5px',
+            borderRadius: '3px',
+            whiteSpace: 'nowrap',
+            maxWidth: '90px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            fontFamily: 'Inter, -apple-system, sans-serif',
+            lineHeight: 1.4,
+          }}
+        >
+          {item.name}
+        </div>
+      </Html>
     </group>
   )
 }
