@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useEffect, useCallback, Component } from 're
 import type { CSSProperties, ReactNode } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
 import { OrbitControls, Html } from '@react-three/drei'
-import type { Room, FurnitureItem, FixedElement } from '../types'
+import type { Room, FurnitureItem, FixedElement, ClearanceWarning } from '../types'
 import { getFurnitureHeightCm } from '../utils/furniture3dDefaults'
 
 // 1 Three.js unit = 100cm
@@ -285,6 +285,7 @@ interface ThreePreviewProps {
   room: Room
   furniture: FurnitureItem[]
   fixedElements: FixedElement[]
+  warnings?: ClearanceWarning[]
 }
 
 export function ThreePreview({ room, furniture, fixedElements }: ThreePreviewProps) {
