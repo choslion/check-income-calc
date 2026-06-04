@@ -26,38 +26,6 @@ function RoomFloor({ room }: { room: Room }) {
   )
 }
 
-// ── Room perimeter border ─────────────────────────────────────────────────────
-
-function RoomBorder({ room }: { room: Room }) {
-  const W = u(room.width)
-  const D = u(room.height)
-  const thick = u(4)
-  const bh = u(6)
-  const by = bh / 2
-  const color = '#4d8ad6'
-
-  return (
-    <>
-      <mesh position={[W / 2, by, 0]}>
-        <boxGeometry args={[W + thick * 2, bh, thick]} />
-        <meshStandardMaterial color={color} />
-      </mesh>
-      <mesh position={[W / 2, by, D]}>
-        <boxGeometry args={[W + thick * 2, bh, thick]} />
-        <meshStandardMaterial color={color} />
-      </mesh>
-      <mesh position={[0, by, D / 2]}>
-        <boxGeometry args={[thick, bh, D]} />
-        <meshStandardMaterial color={color} />
-      </mesh>
-      <mesh position={[W, by, D / 2]}>
-        <boxGeometry args={[thick, bh, D]} />
-        <meshStandardMaterial color={color} />
-      </mesh>
-    </>
-  )
-}
-
 // ── Floor perimeter outline ────────────────────────────────────────────────────
 
 function RoomFloorOutline({ room }: { room: Room }) {
