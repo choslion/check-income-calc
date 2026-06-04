@@ -70,6 +70,27 @@ function RoomFloorOutline({ room }: { room: Room }) {
   return <Line points={points} color="#7ab8ff" lineWidth={2} />
 }
 
+// ── Corner vertical lines ──────────────────────────────────────────────────────
+
+function RoomCornerLines({ room }: { room: Room }) {
+  const W = u(room.width)
+  const D = u(room.height)
+  const H = u(240)
+  const corners: [number, number, number][][] = [
+    [[0, 0, 0], [0, H, 0]],
+    [[W, 0, 0], [W, H, 0]],
+    [[W, 0, D], [W, H, D]],
+    [[0, 0, D], [0, H, D]],
+  ]
+  return (
+    <>
+      {corners.map((pts, i) => (
+        <Line key={i} points={pts} color="#5a9ae0" lineWidth={1.5} />
+      ))}
+    </>
+  )
+}
+
 // ── Walls ─────────────────────────────────────────────────────────────────────
 
 function RoomWalls({ room }: { room: Room }) {
@@ -344,6 +365,7 @@ export function ThreePreview({ room, furniture, fixedElements }: ThreePreviewPro
         <RoomFloor room={room} />
         <RoomBorder room={room} />
         <RoomFloorOutline room={room} />
+        <RoomCornerLines room={room} />
         <RoomWalls room={room} />
         {furniture.map(f => (
           <FurnitureBlock key={f.id} item={f} />
