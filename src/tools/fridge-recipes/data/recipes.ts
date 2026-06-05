@@ -390,6 +390,53 @@ export const RECIPES: Recipe[] = [
   },
 ]
 
+  // ── 대패삼겹 / 우삼겹 ─────────────────────────────────────
+  {
+    id: 'daepae-gui',
+    name: '대패삼겹 구이',
+    requiredIngredients: ['대패삼겹'],
+    optionalIngredients: ['양파', '대파', '마늘'],
+    requiredSeasonings: ['식용유', '소금'],
+    optionalSeasonings: ['된장', '후추', '다진마늘', '참기름'],
+    difficulty: 'easy', estimatedTimeMinutes: 10,
+    reason: '대패삼겹은 얇아서 금방 익고 별다른 양념 없이도 맛있어요.',
+    simpleSteps: ['팬을 달궈 식용유를 살짝 두려요', '대패삼겹을 펼쳐 앞뒤로 구워요', '소금·후추로 간을 맞춰요'],
+  },
+  {
+    id: 'daepae-bokkeum',
+    name: '대패삼겹 볶음',
+    requiredIngredients: ['대패삼겹', '양파'],
+    optionalIngredients: ['대파', '양배추', '버섯'],
+    requiredSeasonings: ['간장', '식용유'],
+    optionalSeasonings: ['다진마늘', '참기름', '고추장', '설탕', '깨'],
+    difficulty: 'easy', estimatedTimeMinutes: 15,
+    reason: '대패삼겹과 양파를 간장에 볶으면 간단하게 밥반찬이 돼요.',
+    simpleSteps: ['양파를 채 썰어요', '팬에 식용유를 두르고 대패삼겹을 먼저 볶아요', '양파와 간장을 넣고 함께 볶아 마무리해요'],
+  },
+  {
+    id: 'usamgyeop-deopbap',
+    name: '우삼겹 덮밥',
+    requiredIngredients: ['밥', '우삼겹', '양파'],
+    optionalIngredients: ['대파', '버섯'],
+    requiredSeasonings: ['간장', '설탕', '식용유'],
+    optionalSeasonings: ['참기름', '다진마늘', '굴소스', '맛술', '깨'],
+    difficulty: 'easy', estimatedTimeMinutes: 15,
+    reason: '우삼겹을 달콤한 간장 소스로 조려 밥 위에 올리면 덮밥이 돼요.',
+    simpleSteps: ['양파를 채 썰어 볶아요', '우삼겹과 간장·설탕을 넣고 볶아요', '밥 위에 올려 마무리해요'],
+  },
+  {
+    id: 'usamgyeop-bokkeum',
+    name: '우삼겹 볶음',
+    requiredIngredients: ['우삼겹', '양파'],
+    optionalIngredients: ['대파', '양배추', '버섯'],
+    requiredSeasonings: ['간장', '식용유', '설탕'],
+    optionalSeasonings: ['다진마늘', '참기름', '굴소스', '깨'],
+    difficulty: 'easy', estimatedTimeMinutes: 12,
+    reason: '우삼겹은 기름이 있어 볶으면 고소하고 부드러워요.',
+    simpleSteps: ['팬에 식용유를 두르고 양파를 볶아요', '우삼겹을 넣고 간장·설탕으로 양념해요', '참기름으로 마무리해요'],
+  },
+]
+
 export const SEASONING_GROUPS = [
   {
     id: 'basic',
@@ -414,6 +461,7 @@ export const MAIN_INGREDIENTS = [
   '밥', '계란', '김치', '두부', '돼지고기', '닭고기', '참치',
   '양파', '대파', '마늘', '감자', '양배추', '버섯',
   '라면', '콩나물', '소시지', '밀가루',
+  '대패삼겹', '우삼겹',
 ]
 
 export const PRESETS = [
