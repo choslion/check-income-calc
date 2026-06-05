@@ -202,7 +202,7 @@ export function DeliveryVsCookingTool() {
         </div>
 
         {fromRecipe && (
-          <div className="px-4 py-3 rounded-xl text-sm" style={{ backgroundColor: 'rgba(252,213,53,0.08)', border: '1px solid var(--hairline)', color: 'var(--on-dark-mute)', lineHeight: 1.6 }}>
+          <div className="px-4 py-4 rounded-xl text-sm" style={{ backgroundColor: 'rgba(252,213,53,0.08)', border: '1px solid var(--hairline)', color: 'var(--on-dark-mute)', lineHeight: 1.7 }}>
             <span style={{ color: 'var(--primary)', fontWeight: 600 }}>{fromRecipe.selectedRecipeName}</span>을 해먹는 비용이 배달보다 이득인지 비교해볼게요.
             재료비와 끼니 수를 입력해 주세요.
           </div>

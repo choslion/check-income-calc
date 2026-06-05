@@ -147,7 +147,7 @@ export function FridgeRecipesTool() {
 
         {/* Contextual message */}
         {fromCalc && (
-          <div className="px-4 py-3 rounded-xl text-sm" style={{ backgroundColor: 'rgba(14,203,129,0.06)', border: '1px solid var(--hairline)', color: 'var(--on-dark-mute)', lineHeight: 1.6 }}>
+          <div className="px-4 py-4 rounded-xl text-sm" style={{ backgroundColor: 'rgba(14,203,129,0.06)', border: '1px solid var(--hairline)', color: 'var(--on-dark-mute)', lineHeight: 1.7 }}>
             {fromCalc.winner === 'cooking'
               ? <><span style={{ color: 'var(--success)', fontWeight: 600 }}>요리가 더 이득</span>으로 나왔어요.<br /></>
               : <>비용이 비슷하게 나왔어요.<br /></>
