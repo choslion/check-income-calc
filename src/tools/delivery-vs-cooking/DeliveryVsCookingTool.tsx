@@ -195,10 +195,10 @@ export function DeliveryVsCookingTool() {
     <div className="px-4 py-8">
       <div className="max-w-xl mx-auto space-y-3">
 
-        <div className="mb-1">
+        <div className="mb-4">
           <p className="text-xs font-semibold tracking-widest uppercase mb-1" style={{ color: 'var(--on-dark-mute)' }}>Food / Meal Budget</p>
           <h1 className="text-3xl font-bold leading-none" style={{ color: 'var(--on-dark)', letterSpacing: '-0.6px' }}>배달 vs 요리</h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--on-dark-mute)' }}>1끼당 비용을 비교해드릴게요</p>
+          <p className="text-sm mt-1.5" style={{ color: 'var(--on-dark-mute)' }}>1끼당 비용을 비교해드릴게요</p>
         </div>
 
         {fromRecipe && (

@@ -139,10 +139,10 @@ export function FridgeRecipesTool() {
       <div className="max-w-xl mx-auto space-y-3">
 
         {/* Header */}
-        <div className="mb-1">
+        <div className="mb-4">
           <p className="text-xs font-semibold tracking-widest uppercase mb-1" style={{ color: 'var(--on-dark-mute)' }}>Food / Meal Budget</p>
           <h1 className="text-3xl font-bold leading-none" style={{ color: 'var(--on-dark)', letterSpacing: '-0.6px' }}>냉장고 재료 요리 추천</h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--on-dark-mute)' }}>있는 재료와 조미료를 골라보세요</p>
+          <p className="text-sm mt-1.5" style={{ color: 'var(--on-dark-mute)' }}>있는 재료와 조미료를 골라보세요</p>
         </div>
 
         {/* Contextual message */}
