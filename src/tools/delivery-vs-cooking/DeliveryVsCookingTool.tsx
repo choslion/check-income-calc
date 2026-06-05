@@ -32,7 +32,7 @@ const INPUT_BASE = {
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-2">
       <span className="text-xs font-medium" style={{ color: 'var(--on-dark-mute)' }}>{label}</span>
       {children}
     </div>
@@ -214,19 +214,19 @@ export function DeliveryVsCookingTool() {
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <Field label="음식 가격">
-                <UnitInput value={deliveryPrice} onChange={setDeliveryPrice} unit="원" />
                 <QuickChips chips={CHIPS.foodPrice} currentValue={deliveryPrice} onSelect={setDeliveryPrice} />
+                <UnitInput value={deliveryPrice} onChange={setDeliveryPrice} unit="원" />
               </Field>
               <Field label="배달비">
-                <UnitInput value={deliveryFee} onChange={setDeliveryFee} unit="원" />
                 <QuickChips chips={CHIPS.deliveryFee} currentValue={deliveryFee} onSelect={setDeliveryFee} />
+                <UnitInput value={deliveryFee} onChange={setDeliveryFee} unit="원" />
               </Field>
               <Field label="할인 금액">
                 <UnitInput value={discount} onChange={setDiscount} unit="원" />
               </Field>
               <Field label="이 배달로 먹을 끼니 수">
-                <UnitInput value={deliveryMeals} onChange={setDeliveryMeals} unit="끼" />
                 <QuickChips chips={CHIPS.deliveryMeals} currentValue={deliveryMeals} onSelect={setDeliveryMeals} />
+                <UnitInput value={deliveryMeals} onChange={setDeliveryMeals} unit="끼" />
               </Field>
             </div>
             <p style={HINT}>혼자 2번 먹거나 둘이 한 번 먹으면 2끼로 계산해요.</p>
@@ -238,8 +238,8 @@ export function DeliveryVsCookingTool() {
           <p style={SEC}>🍳  요리 비용</p>
           <div className="space-y-3">
             <Field label="요리에 쓸 재료비">
-              <UnitInput value={ingredientCost} onChange={setIngredientCost} unit="원" />
               <QuickChips chips={CHIPS.cookingCost} currentValue={ingredientCost} onSelect={setIngredientCost} />
+              <UnitInput value={ingredientCost} onChange={setIngredientCost} unit="원" />
             </Field>
             <p style={HINT}>새로 사는 재료비를 넣어도 되고, 집에 있는 재료까지 사용분으로 계산해도 돼요.</p>
 
@@ -306,8 +306,8 @@ export function DeliveryVsCookingTool() {
             )}
 
             <Field label="이 재료로 먹을 끼니 수">
-              <UnitInput value={cookingMeals} onChange={setCookingMeals} unit="끼" />
               <QuickChips chips={CHIPS.cookingMeals} currentValue={cookingMeals} onSelect={setCookingMeals} />
+              <UnitInput value={cookingMeals} onChange={setCookingMeals} unit="끼" />
             </Field>
           </div>
 
