@@ -170,7 +170,7 @@ export default function HomePage() {
         {featuredTools.length > 0 && (
           <div>
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--on-dark-mute)' }}>
-              오늘 많이 쓰는 도구
+              추천 도구
             </p>
             <div className="flex flex-col gap-3">
               {featuredTools.map(tool => <ToolCard key={tool.id} tool={tool} />)}
