@@ -55,7 +55,7 @@ export const RECIPES: Recipe[] = [
     requiredIngredients: ['두부'],
     optionalIngredients: ['양파', '대파', '감자', '버섯'],
     requiredSeasonings: ['된장', '다진마늘'],
-    optionalSeasonings: ['간장', '고춧가루'],
+    optionalSeasonings: ['간장', '고춧가루', '멸치액젓', '까나리액젓'],
     difficulty: 'normal',
     estimatedTimeMinutes: 25,
     reason: '된장과 두부만 있으면 진한 국물 요리를 만들 수 있어요.',
@@ -78,7 +78,7 @@ export const RECIPES: Recipe[] = [
     name: '참치마요덮밥',
     requiredIngredients: ['밥', '참치'],
     optionalIngredients: ['계란', '대파', '양파'],
-    requiredSeasonings: ['간장'],
+    requiredSeasonings: ['마요네즈', '간장'],
     optionalSeasonings: ['참기름', '설탕', '고춧가루'],
     difficulty: 'easy',
     estimatedTimeMinutes: 10,
@@ -103,7 +103,7 @@ export const RECIPES: Recipe[] = [
     requiredIngredients: ['김치', '돼지고기'],
     optionalIngredients: ['두부', '대파', '양파'],
     requiredSeasonings: ['고춧가루', '간장', '다진마늘'],
-    optionalSeasonings: ['고추장', '설탕', '참기름'],
+    optionalSeasonings: ['고추장', '설탕', '참기름', '멸치액젓'],
     difficulty: 'normal',
     estimatedTimeMinutes: 30,
     reason: '묵은 김치를 맛있게 활용할 수 있어요.',
@@ -177,7 +177,8 @@ export const MAIN_INGREDIENTS = [
 ]
 
 export const SEASONINGS = [
-  '간장', '고추장', '고춧가루', '참기름', '식용유',
-  '설탕', '올리고당', '식초', '소금', '후추',
-  '된장', '다진마늘', '굴소스',
+  '간장', '고추장', '고춧가루', '참기름', '들기름', '식용유',
+  '설탕', '올리고당', '물엿', '식초', '소금', '후추',
+  '된장', '다진마늘', '굴소스', '마요네즈', '맛술',
+  '멸치액젓', '까나리액젓',
 ]
