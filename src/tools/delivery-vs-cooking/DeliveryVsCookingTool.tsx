@@ -32,11 +32,51 @@ const INPUT_BASE = {
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1.5">
       <span className="text-xs font-medium" style={{ color: 'var(--on-dark-mute)' }}>{label}</span>
       {children}
     </div>
   )
+}
+
+interface QuickChip { label: string; value: number }
+
+function QuickChips({
+  chips, currentValue, onSelect,
+}: {
+  chips: QuickChip[]; currentValue: string; onSelect: (v: string) => void
+}) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {chips.map(chip => {
+        const selected = currentValue !== '' && parseNum(currentValue) === chip.value
+        return (
+          <button
+            key={chip.value}
+            onClick={() => onSelect(String(chip.value))}
+            className="text-xs px-2.5 py-1 transition-colors"
+            style={{
+              backgroundColor: selected ? 'rgba(252,213,53,0.12)' : 'transparent',
+              color: selected ? 'var(--primary)' : 'var(--on-dark-mute)',
+              border: `1px solid ${selected ? 'var(--primary)' : 'var(--hairline)'}`,
+              borderRadius: 'var(--radius-pill)',
+              cursor: 'pointer',
+            }}
+          >
+            {chip.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+const CHIPS = {
+  foodPrice:    [12000, 15000, 18000, 20000].map(v => ({ label: new Intl.NumberFormat('ko-KR').format(v), value: v })),
+  deliveryFee:  [0, 2000, 3000, 4000].map(v => ({ label: v === 0 ? '0' : new Intl.NumberFormat('ko-KR').format(v), value: v })),
+  deliveryMeals:[1, 2, 3].map(v => ({ label: `${v}끼`, value: v })),
+  cookingCost:  [5000, 10000, 15000, 20000].map(v => ({ label: new Intl.NumberFormat('ko-KR').format(v), value: v })),
+  cookingMeals: [1, 2, 3, 4].map(v => ({ label: `${v}끼`, value: v })),
 }
 
 function UnitInput({
@@ -175,15 +215,18 @@ export function DeliveryVsCookingTool() {
             <div className="grid grid-cols-2 gap-3">
               <Field label="음식 가격">
                 <UnitInput value={deliveryPrice} onChange={setDeliveryPrice} unit="원" />
+                <QuickChips chips={CHIPS.foodPrice} currentValue={deliveryPrice} onSelect={setDeliveryPrice} />
               </Field>
               <Field label="배달비">
                 <UnitInput value={deliveryFee} onChange={setDeliveryFee} unit="원" />
+                <QuickChips chips={CHIPS.deliveryFee} currentValue={deliveryFee} onSelect={setDeliveryFee} />
               </Field>
               <Field label="할인 금액">
                 <UnitInput value={discount} onChange={setDiscount} unit="원" />
               </Field>
               <Field label="이 배달로 먹을 끼니 수">
                 <UnitInput value={deliveryMeals} onChange={setDeliveryMeals} unit="끼" />
+                <QuickChips chips={CHIPS.deliveryMeals} currentValue={deliveryMeals} onSelect={setDeliveryMeals} />
               </Field>
             </div>
             <p style={HINT}>혼자 2번 먹거나 둘이 한 번 먹으면 2끼로 계산해요.</p>
@@ -196,6 +239,7 @@ export function DeliveryVsCookingTool() {
           <div className="space-y-3">
             <Field label="요리에 쓸 재료비">
               <UnitInput value={ingredientCost} onChange={setIngredientCost} unit="원" />
+              <QuickChips chips={CHIPS.cookingCost} currentValue={ingredientCost} onSelect={setIngredientCost} />
             </Field>
             <p style={HINT}>새로 사는 재료비를 넣어도 되고, 집에 있는 재료까지 사용분으로 계산해도 돼요.</p>
 
@@ -263,6 +307,7 @@ export function DeliveryVsCookingTool() {
 
             <Field label="이 재료로 먹을 끼니 수">
               <UnitInput value={cookingMeals} onChange={setCookingMeals} unit="끼" />
+              <QuickChips chips={CHIPS.cookingMeals} currentValue={cookingMeals} onSelect={setCookingMeals} />
             </Field>
           </div>
 
