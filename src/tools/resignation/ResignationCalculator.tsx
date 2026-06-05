@@ -49,7 +49,7 @@ export function ResignationCalculator() {
     <div className="px-4 py-8">
       <div className="max-w-xl mx-auto space-y-3">
         {/* 헤더 */}
-        <div className="flex items-end justify-between mb-2">
+        <div className="flex items-end justify-between mb-4">
           <div>
             <p className="text-xs font-semibold tracking-widest uppercase mb-1" style={{ color: 'var(--on-dark-mute)' }}>
               Resignation Calculator

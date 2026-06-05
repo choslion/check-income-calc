@@ -254,7 +254,7 @@ export function SubscriptionTool() {
       <div className="max-w-xl mx-auto space-y-4">
 
         {/* Header */}
-        <div className="flex items-end justify-between mb-2">
+        <div className="flex items-end justify-between mb-4">
           <div>
             <p className="text-xs font-semibold tracking-widest uppercase mb-1" style={{ color: 'var(--on-dark-mute)' }}>
               Subscription Tracker
