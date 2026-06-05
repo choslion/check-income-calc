@@ -272,10 +272,12 @@ export function FridgeRecipesTool() {
             {!showCustomInput && (
               <button
                 onClick={() => setShowCustomInput(true)}
-                className="flex items-center gap-1 text-xs"
-                style={{ color: 'var(--on-dark-mute)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors"
+                style={{ color: 'var(--on-dark-mute)', background: 'transparent', border: '1.5px dashed var(--hairline)', borderRadius: 'var(--radius-pill)', cursor: 'pointer' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.color = 'var(--primary)' }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--hairline)'; e.currentTarget.style.color = 'var(--on-dark-mute)' }}
               >
-                <Plus size={12} />직접 입력
+                <Plus size={13} />직접 입력
               </button>
             )}
           </div>
