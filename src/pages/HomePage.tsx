@@ -120,7 +120,7 @@ function RecentToolCard() {
 export default function HomePage() {
   useEffect(() => { document.title = '생활계산소' }, [])
   const navigate = useNavigate()
-  const featuredTools = TOOLS.filter(t => ['budget', 'waste-sorting'].includes(t.id))
+  const featuredTools = TOOLS.filter(t => ['delivery-vs-cooking', 'fridge-recipes', 'subscription', 'room-simulator'].includes(t.id))
   const comingSoon = TOOLS.filter(t => t.status === 'coming-soon').slice(0, 3)
 
   return (
@@ -134,18 +134,19 @@ export default function HomePage() {
           >
             생활계산소
           </h1>
-          <p className="text-sm" style={{ color: 'var(--on-dark-mute)' }}>
-            자주 필요한 생활 계산과 정리 도구를 한 곳에 모았어요.
+          <p className="text-sm" style={{ color: 'var(--on-dark-mute)', lineHeight: 1.6 }}>
+            돈, 식비, 집, 공간까지<br />
+            일상에 필요한 판단을 한곳에서 정리해요.
           </p>
           <div className="flex gap-2 mt-4">
             <button
-              onClick={() => navigate('/tools/budget')}
+              onClick={() => navigate('/tools')}
               className="px-5 py-2.5 text-sm font-semibold transition-colors"
               style={{ backgroundColor: 'var(--primary)', color: 'var(--on-primary)', borderRadius: 'var(--radius-pill)' }}
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary-hover)')}
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary)')}
             >
-              예산 계산기 시작
+              도구 둘러보기
             </button>
             <button
               onClick={() => navigate('/tools')}
@@ -169,7 +170,7 @@ export default function HomePage() {
         {featuredTools.length > 0 && (
           <div>
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--on-dark-mute)' }}>
-              추천 도구
+              오늘 많이 쓰는 도구
             </p>
             <div className="flex flex-col gap-3">
               {featuredTools.map(tool => <ToolCard key={tool.id} tool={tool} />)}

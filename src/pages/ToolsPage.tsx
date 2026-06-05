@@ -3,7 +3,7 @@ import { TOOLS, CATEGORY_LABELS, type ToolCategory } from '../data/tools'
 import { ToolSection } from '../components/tools/ToolSection'
 import { AdBannerSlot } from '../components/ads/AdBannerSlot'
 
-const CATEGORIES: ToolCategory[] = ['money', 'work', 'utility', 'food']
+const CATEGORIES: ToolCategory[] = ['money', 'food', 'space', 'living']
 
 const availableTools = TOOLS.filter(t => t.status === 'available')
 const comingSoonTools = TOOLS.filter(t => t.status === 'coming-soon')
@@ -18,7 +18,7 @@ export default function ToolsPage() {
             전체 도구
           </p>
           <h1 className="text-3xl font-bold" style={{ color: 'var(--on-dark)', letterSpacing: '-0.6px' }}>
-            {availableTools.length}개의 계산 도구
+            {availableTools.length}개의 생활 도구
           </h1>
         </div>
 
