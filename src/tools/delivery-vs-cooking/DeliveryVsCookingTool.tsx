@@ -212,7 +212,7 @@ export function DeliveryVsCookingTool() {
         <div style={CARD}>
           <p style={SEC}>🛵  배달 비용</p>
           <div className="space-y-4">
-            <Field label="음식 가격">
+            <Field label="먹고 싶은 음식 가격">
               <QuickChips chips={CHIPS.foodPrice} currentValue={deliveryPrice} onSelect={setDeliveryPrice} />
               <UnitInput value={deliveryPrice} onChange={setDeliveryPrice} unit="원" />
             </Field>
