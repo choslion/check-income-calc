@@ -29,16 +29,16 @@ export function AnnualSavingsProjection() {
             </span>
           </div>
           <div
-            className="flex items-center justify-between py-3 px-4 rounded-xl"
+            className="py-3 px-4 rounded-xl"
             style={{ backgroundColor: 'var(--surface-input)' }}
           >
-            <span className="text-sm font-medium" style={{ color: 'var(--on-dark-mute)' }}>이 속도라면 1년 후</span>
-            <span
+            <p className="text-xs font-medium mb-1" style={{ color: 'var(--on-dark-mute)' }}>이 속도라면 1년 후</p>
+            <p
               className="text-xl font-bold"
-              style={{ color: 'var(--primary)', fontFamily: 'var(--font-number)', letterSpacing: '-0.4px' }}
+              style={{ color: 'var(--primary)', fontFamily: 'var(--font-number)', letterSpacing: '-0.5px' }}
             >
               {formatKRW(calc.annualSavings)}원
-            </span>
+            </p>
           </div>
         </div>
       )}
