@@ -16,10 +16,10 @@ function parseNum(s: string): number {
   return isNaN(n) || n < 0 ? 0 : n
 }
 
-const WINNER_CFG: Record<Winner, { label: string; color: string; bg: string }> = {
-  cooking:  { label: '요리가 더 이득',  color: 'var(--success)',      bg: 'rgba(14,203,129,0.1)'  },
-  delivery: { label: '배달이 더 이득',  color: 'var(--primary)',      bg: 'rgba(252,213,53,0.1)'  },
-  similar:  { label: '비슷한 비용',     color: 'var(--on-dark-mute)', bg: 'var(--surface-input)'  },
+const WINNER_CFG: Record<Winner, { label: string; color: string }> = {
+  cooking:  { label: '요리가 더 이득이에요',  color: 'var(--success)'      },
+  delivery: { label: '배달이 더 저렴해요',    color: 'var(--primary)'      },
+  similar:  { label: '비슷한 비용이에요',     color: 'var(--on-dark-mute)' },
 }
 
 const INPUT_BASE = {
@@ -70,28 +70,38 @@ function newItem(): IngredientItem {
   return { id: crypto.randomUUID(), name: '', amount: '' }
 }
 
+function BreakEvenMsg({ breakEven, cookingMeals }: { breakEven: number; cookingMeals: number }) {
+  if (breakEven === 1) return <span>1끼만 먹어도 배달보다 저렴해요.</span>
+  if (cookingMeals >= breakEven) {
+    return (
+      <span>
+        이 재료로 <strong>{breakEven}끼</strong> 이상 먹으면 배달보다 저렴해져요.
+        현재 입력한 {cookingMeals}끼는 이미 이득이에요.
+      </span>
+    )
+  }
+  return (
+    <span>
+      이 재료로 <strong>{breakEven}끼</strong> 이상 먹어야 배달보다 저렴해져요.
+      현재는 {cookingMeals}끼로 아직 배달이 이득이에요.
+    </span>
+  )
+}
+
 export function DeliveryVsCookingTool() {
   const navigate = useNavigate()
 
-  // Delivery
-  const [deliveryPrice, setDeliveryPrice] = useState('')
-  const [deliveryFee, setDeliveryFee]     = useState('')
-  const [discount, setDiscount]           = useState('')
-  const [servings, setServings]           = useState('1')
-
-  // Cooking
+  const [deliveryPrice, setDeliveryPrice]   = useState('')
+  const [deliveryFee, setDeliveryFee]       = useState('')
+  const [discount, setDiscount]             = useState('')
+  const [deliveryMeals, setDeliveryMeals]   = useState('1')
   const [ingredientCost, setIngredientCost] = useState('')
-  const [mealCount, setMealCount]           = useState('1')
-
-  // Ingredient breakdown
-  const [showBreakdown, setShowBreakdown] = useState(false)
-  const [items, setItems] = useState<IngredientItem[]>([])
-
-  // Time (optional)
+  const [cookingMeals, setCookingMeals]     = useState('1')
+  const [showBreakdown, setShowBreakdown]   = useState(false)
+  const [items, setItems]                   = useState<IngredientItem[]>([])
   const [cookTime, setCookTime]   = useState('')
   const [cleanTime, setCleanTime] = useState('')
   const [showTime, setShowTime]   = useState(false)
-
   const [fromRecipe, setFromRecipe] = useState<HandoffToCalculator | null>(null)
 
   useEffect(() => {
@@ -103,26 +113,25 @@ export function DeliveryVsCookingTool() {
     } catch { /* ignore */ }
   }, [])
 
-  const itemsTotal = items.reduce((sum, it) => sum + parseNum(it.amount), 0)
+  const itemsTotal    = items.reduce((sum, it) => sum + parseNum(it.amount), 0)
+  const cookingMealsN = parseNum(cookingMeals) || 1
 
-  function addItem() { setItems(prev => [...prev, newItem()]) }
+  function addItem()    { setItems(prev => [...prev, newItem()]) }
   function removeItem(id: string) { setItems(prev => prev.filter(it => it.id !== id)) }
   function updateItem(id: string, field: 'name' | 'amount', val: string) {
     setItems(prev => prev.map(it => it.id === id ? { ...it, [field]: val } : it))
   }
-  function applyItemsTotal() {
-    setIngredientCost(String(itemsTotal))
-  }
+  function applyItemsTotal() { setIngredientCost(String(itemsTotal)) }
 
   const result = calculateDeliveryVsCooking({
-    deliveryFoodPrice:    parseNum(deliveryPrice),
-    deliveryFee:          parseNum(deliveryFee),
-    discountAmount:       parseNum(discount),
-    deliveryServingCount: parseNum(servings) || 1,
-    ingredientCost:       parseNum(ingredientCost),
-    expectedMealCount:    parseNum(mealCount) || 1,
-    cookingTimeMinutes:   parseNum(cookTime),
-    cleanupTimeMinutes:   parseNum(cleanTime),
+    deliveryFoodPrice:  parseNum(deliveryPrice),
+    deliveryFee:        parseNum(deliveryFee),
+    discountAmount:     parseNum(discount),
+    deliveryMealCount:  parseNum(deliveryMeals) || 1,
+    ingredientCost:     parseNum(ingredientCost),
+    cookingMealCount:   cookingMealsN,
+    cookingTimeMinutes: parseNum(cookTime),
+    cleanupTimeMinutes: parseNum(cleanTime),
   })
 
   const totalTime = parseNum(cookTime) + parseNum(cleanTime)
@@ -132,7 +141,7 @@ export function DeliveryVsCookingTool() {
     sessionStorage.setItem(HANDOFF_KEY, JSON.stringify({
       fromCalculator: true,
       ingredientCost: parseNum(ingredientCost),
-      expectedMealCount: parseNum(mealCount) || 1,
+      cookingMealCount: cookingMealsN,
       winner: result.winner,
     }))
     navigate('/tools/fridge-recipes')
@@ -140,23 +149,18 @@ export function DeliveryVsCookingTool() {
 
   const CARD = { backgroundColor: 'var(--surface-card)', borderRadius: 'var(--radius-card)', padding: '16px' }
   const SEC  = { color: 'var(--on-dark-mute)', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const, marginBottom: 12 }
+  const HINT = { color: 'var(--muted)', fontSize: 12, lineHeight: 1.5, marginTop: -4 } as const
 
   return (
     <div className="px-4 py-8">
       <div className="max-w-xl mx-auto space-y-3">
 
-        {/* Header */}
         <div className="mb-1">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-1" style={{ color: 'var(--on-dark-mute)' }}>
-            Food / Meal Budget
-          </p>
-          <h1 className="text-3xl font-bold leading-none" style={{ color: 'var(--on-dark)', letterSpacing: '-0.6px' }}>
-            배달 vs 요리
-          </h1>
+          <p className="text-xs font-semibold tracking-widest uppercase mb-1" style={{ color: 'var(--on-dark-mute)' }}>Food / Meal Budget</p>
+          <h1 className="text-3xl font-bold leading-none" style={{ color: 'var(--on-dark)', letterSpacing: '-0.6px' }}>배달 vs 요리</h1>
           <p className="text-sm mt-1" style={{ color: 'var(--on-dark-mute)' }}>1끼당 비용을 비교해드릴게요</p>
         </div>
 
-        {/* Contextual message */}
         {fromRecipe && (
           <div className="px-4 py-3 rounded-xl text-sm" style={{ backgroundColor: 'rgba(252,213,53,0.08)', border: '1px solid var(--hairline)', color: 'var(--on-dark-mute)', lineHeight: 1.6 }}>
             <span style={{ color: 'var(--primary)', fontWeight: 600 }}>{fromRecipe.selectedRecipeName}</span>을 해먹는 비용이 배달보다 이득인지 비교해볼게요.
@@ -167,19 +171,22 @@ export function DeliveryVsCookingTool() {
         {/* ── 배달 비용 ── */}
         <div style={CARD}>
           <p style={SEC}>🛵  배달 비용</p>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="음식 가격">
-              <UnitInput value={deliveryPrice} onChange={setDeliveryPrice} unit="원" />
-            </Field>
-            <Field label="배달비">
-              <UnitInput value={deliveryFee} onChange={setDeliveryFee} unit="원" />
-            </Field>
-            <Field label="할인 금액">
-              <UnitInput value={discount} onChange={setDiscount} unit="원" />
-            </Field>
-            <Field label="인원 수">
-              <UnitInput value={servings} onChange={setServings} unit="명" />
-            </Field>
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="음식 가격">
+                <UnitInput value={deliveryPrice} onChange={setDeliveryPrice} unit="원" />
+              </Field>
+              <Field label="배달비">
+                <UnitInput value={deliveryFee} onChange={setDeliveryFee} unit="원" />
+              </Field>
+              <Field label="할인 금액">
+                <UnitInput value={discount} onChange={setDiscount} unit="원" />
+              </Field>
+              <Field label="이 배달로 먹을 끼니 수">
+                <UnitInput value={deliveryMeals} onChange={setDeliveryMeals} unit="끼" />
+              </Field>
+            </div>
+            <p style={HINT}>혼자 2번 먹거나 둘이 한 번 먹으면 2끼로 계산해요.</p>
           </div>
         </div>
 
@@ -187,16 +194,11 @@ export function DeliveryVsCookingTool() {
         <div style={CARD}>
           <p style={SEC}>🍳  요리 비용</p>
           <div className="space-y-3">
-
-            {/* 요리에 쓸 재료비 */}
             <Field label="요리에 쓸 재료비">
               <UnitInput value={ingredientCost} onChange={setIngredientCost} unit="원" />
             </Field>
-            <p className="text-xs leading-relaxed" style={{ color: 'var(--muted)', marginTop: -4 }}>
-              새로 사는 재료비를 넣어도 되고, 집에 있는 재료까지 사용분으로 계산해도 돼요.
-            </p>
+            <p style={HINT}>새로 사는 재료비를 넣어도 되고, 집에 있는 재료까지 사용분으로 계산해도 돼요.</p>
 
-            {/* 재료별로 계산하기 toggle */}
             <button
               onClick={() => { setShowBreakdown(p => !p); if (!showBreakdown && items.length === 0) addItem() }}
               className="flex items-center gap-1.5 text-xs"
@@ -206,7 +208,6 @@ export function DeliveryVsCookingTool() {
               재료별로 계산하기
             </button>
 
-            {/* Breakdown section */}
             {showBreakdown && (
               <div className="space-y-2 pt-1">
                 {items.map(item => (
@@ -222,15 +223,11 @@ export function DeliveryVsCookingTool() {
                       onBlur={e => (e.target.style.borderColor = 'var(--hairline)')}
                     />
                     <div className="shrink-0" style={{ width: 110 }}>
-                      <UnitInput
-                        value={item.amount}
-                        onChange={v => updateItem(item.id, 'amount', v)}
-                        unit="원"
-                      />
+                      <UnitInput value={item.amount} onChange={v => updateItem(item.id, 'amount', v)} unit="원" />
                     </div>
                     <button
                       onClick={() => removeItem(item.id)}
-                      className="p-1.5 shrink-0 transition-colors"
+                      className="p-1.5 shrink-0"
                       style={{ color: 'var(--on-dark-mute)', backgroundColor: 'var(--surface-input)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-input)', cursor: 'pointer' }}
                       onMouseEnter={e => (e.currentTarget.style.color = 'var(--danger)')}
                       onMouseLeave={e => (e.currentTarget.style.color = 'var(--on-dark-mute)')}
@@ -239,18 +236,13 @@ export function DeliveryVsCookingTool() {
                     </button>
                   </div>
                 ))}
-
-                {/* Add row button */}
                 <button
                   onClick={addItem}
-                  className="flex items-center gap-1.5 text-xs py-1.5"
+                  className="flex items-center gap-1.5 text-xs"
                   style={{ color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                 >
-                  <Plus size={13} />
-                  재료 추가
+                  <Plus size={13} />재료 추가
                 </button>
-
-                {/* Total + apply */}
                 {itemsTotal > 0 && (
                   <div className="flex items-center justify-between pt-2" style={{ borderTop: '1px solid var(--hairline)' }}>
                     <span className="text-xs" style={{ color: 'var(--on-dark-mute)' }}>
@@ -265,20 +257,15 @@ export function DeliveryVsCookingTool() {
                     </button>
                   </div>
                 )}
-
-                <p className="text-xs" style={{ color: 'var(--muted)' }}>
-                  조미료는 제외하거나, 사용한 만큼만 대략 넣어도 돼요.
-                </p>
+                <p style={HINT}>조미료는 제외하거나, 사용한 만큼만 대략 넣어도 돼요.</p>
               </div>
             )}
 
-            {/* 끼니 수 */}
             <Field label="이 재료로 먹을 끼니 수">
-              <UnitInput value={mealCount} onChange={setMealCount} unit="끼" />
+              <UnitInput value={cookingMeals} onChange={setCookingMeals} unit="끼" />
             </Field>
           </div>
 
-          {/* Time toggle */}
           <button
             onClick={() => setShowTime(p => !p)}
             className="flex items-center gap-1.5 mt-4 text-xs"
@@ -287,15 +274,10 @@ export function DeliveryVsCookingTool() {
             <ChevronDown size={13} style={{ transform: showTime ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
             시간 고려 (선택)
           </button>
-
           {showTime && (
             <div className="grid grid-cols-2 gap-3 mt-3">
-              <Field label="조리 시간">
-                <UnitInput value={cookTime} onChange={setCookTime} unit="분" />
-              </Field>
-              <Field label="설거지 시간">
-                <UnitInput value={cleanTime} onChange={setCleanTime} unit="분" />
-              </Field>
+              <Field label="조리 시간"><UnitInput value={cookTime} onChange={setCookTime} unit="분" /></Field>
+              <Field label="설거지 시간"><UnitInput value={cleanTime} onChange={setCleanTime} unit="분" /></Field>
             </div>
           )}
         </div>
@@ -312,9 +294,9 @@ export function DeliveryVsCookingTool() {
           const cfg = WINNER_CFG[result.winner]
           return (
             <div style={CARD}>
-              <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-3" style={{ backgroundColor: cfg.bg, color: cfg.color }}>
+              <p className="font-bold text-lg mb-3" style={{ color: cfg.color, letterSpacing: '-0.3px' }}>
                 {cfg.label}
-              </span>
+              </p>
 
               <div className="grid grid-cols-2 gap-2 mb-3">
                 <div className="rounded-xl p-3 text-center" style={{ backgroundColor: 'var(--surface-input)' }}>
@@ -333,7 +315,7 @@ export function DeliveryVsCookingTool() {
 
               {result.winner === 'cooking' && result.totalSaving > 0 && (
                 <div className="flex justify-between items-center px-1 mb-3">
-                  <span className="text-sm" style={{ color: 'var(--success)' }}>절약 가능 금액</span>
+                  <span className="text-sm" style={{ color: 'var(--success)' }}>{cookingMealsN}끼 기준 절약</span>
                   <span className="font-bold" style={{ fontFamily: 'var(--font-number)', color: 'var(--success)', fontSize: 17 }}>
                     {fmt(result.totalSaving)}원
                   </span>
@@ -343,23 +325,30 @@ export function DeliveryVsCookingTool() {
               <div className="rounded-xl px-4 py-3 text-sm mb-3" style={{ backgroundColor: 'var(--surface-input)', color: 'var(--on-dark-mute)', lineHeight: 1.65 }}>
                 {result.winner === 'cooking' && (
                   <>요리가 1끼당 약 <strong style={{ color: 'var(--success)' }}>{fmt(Math.abs(result.differencePerMeal))}원</strong> 저렴해요.
-                  {parseNum(mealCount) > 1 && <><br />{parseNum(mealCount)}끼 기준 약 <strong style={{ color: 'var(--success)' }}>{fmt(result.totalSaving)}원</strong> 절약할 수 있어요.</>}</>
+                  {cookingMealsN > 1 && <><br />{cookingMealsN}끼 기준 약 <strong style={{ color: 'var(--success)' }}>{fmt(result.totalSaving)}원</strong> 절약할 수 있어요.</>}</>
                 )}
-                {result.winner === 'delivery' && <>이번에는 배달이 더 저렴할 수 있어요.<br />재료를 한 번만 쓰고 남는 재료가 없다면 요리가 오히려 비쌀 수 있어요.</>}
+                {result.winner === 'delivery' && <>이번에는 배달이 더 저렴해요.<br />재료를 한 번만 쓰고 남는 재료가 없다면 요리가 오히려 비쌀 수 있어요.</>}
                 {result.winner === 'similar'  && <>비용 차이가 크지 않아요.<br />시간과 설거지까지 고려하면 편한 쪽을 선택해도 괜찮아요.</>}
               </div>
+
+              {result.breakEvenMealCount !== undefined && (
+                <div className="px-4 py-2.5 rounded-xl mb-3 text-xs" style={{ backgroundColor: 'var(--surface-input)', color: 'var(--on-dark-mute)', lineHeight: 1.6 }}>
+                  <span className="font-semibold" style={{ color: 'var(--on-dark)' }}>손익분기점  </span>
+                  <BreakEvenMsg breakEven={result.breakEvenMealCount} cookingMeals={cookingMealsN} />
+                </div>
+              )}
 
               {showTime && totalTime > 0 && (
                 <p className="text-xs px-1 mb-3" style={{ color: 'var(--on-dark-mute)' }}>
                   조리와 설거지에 약 {totalTime}분이 필요해요.
-                  {result.winner === 'cooking' && ' 비용은 요리가 저렴하지만, 시간이 부족하면 배달이 더 편할 수 있어요.'}
+                  {result.winner === 'cooking' && ' 시간이 부족하면 배달이 더 편할 수 있어요.'}
                 </p>
               )}
 
               {(result.winner === 'cooking' || result.winner === 'similar') && (
                 <button
                   onClick={goToRecipes}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-colors"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-semibold"
                   style={{ backgroundColor: 'var(--surface-input)', color: 'var(--primary)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-pill)', cursor: 'pointer' }}
                   onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--primary)')}
                   onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--hairline)')}

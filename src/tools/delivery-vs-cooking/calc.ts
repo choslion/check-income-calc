@@ -5,24 +5,37 @@ const SIMILAR_THRESHOLD = 500
 export function calculateDeliveryVsCooking(
   input: DeliveryVsCookingInput
 ): DeliveryVsCookingResult | null {
-  const { deliveryFoodPrice, deliveryFee, discountAmount, ingredientCost, expectedMealCount } = input
+  const { deliveryFoodPrice, deliveryFee, discountAmount, ingredientCost, cookingMealCount } = input
 
-  if (deliveryFoodPrice <= 0 || ingredientCost <= 0 || expectedMealCount <= 0) return null
+  if (deliveryFoodPrice <= 0 || ingredientCost <= 0 || cookingMealCount <= 0) return null
 
-  const servings = Math.max(1, input.deliveryServingCount || 1)
-  const meals = Math.max(1, expectedMealCount)
+  const deliveryMeals = Math.max(1, input.deliveryMealCount || 1)
+  const cookingMeals  = Math.max(1, cookingMealCount)
 
-  const deliveryTotal = Math.max(0, deliveryFoodPrice + deliveryFee - discountAmount)
-  const deliveryCostPerMeal = deliveryTotal / servings
-  const cookingCostPerMeal = ingredientCost / meals
-  const differencePerMeal = deliveryCostPerMeal - cookingCostPerMeal
+  const deliveryTotal      = Math.max(0, deliveryFoodPrice + deliveryFee - discountAmount)
+  const deliveryCostPerMeal = deliveryTotal / deliveryMeals
+  const cookingCostPerMeal  = ingredientCost / cookingMeals
+  const differencePerMeal   = deliveryCostPerMeal - cookingCostPerMeal
 
   let winner: Winner
   if (differencePerMeal > SIMILAR_THRESHOLD) winner = 'cooking'
   else if (differencePerMeal < -SIMILAR_THRESHOLD) winner = 'delivery'
   else winner = 'similar'
 
-  const totalSaving = winner === 'cooking' ? differencePerMeal * meals : 0
+  const totalSaving = winner === 'cooking' ? differencePerMeal * cookingMeals : 0
 
-  return { deliveryTotal, deliveryCostPerMeal, cookingCostPerMeal, differencePerMeal, totalSaving, winner }
+  const breakEvenMealCount =
+    deliveryCostPerMeal > 0
+      ? Math.ceil(ingredientCost / deliveryCostPerMeal)
+      : undefined
+
+  return {
+    deliveryTotal,
+    deliveryCostPerMeal,
+    cookingCostPerMeal,
+    differencePerMeal,
+    totalSaving,
+    winner,
+    breakEvenMealCount,
+  }
 }

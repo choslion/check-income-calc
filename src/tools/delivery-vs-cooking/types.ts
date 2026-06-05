@@ -4,9 +4,9 @@ export interface DeliveryVsCookingInput {
   deliveryFoodPrice: number
   deliveryFee: number
   discountAmount: number
-  deliveryServingCount: number
+  deliveryMealCount: number
   ingredientCost: number
-  expectedMealCount: number
+  cookingMealCount: number
   cookingTimeMinutes: number
   cleanupTimeMinutes: number
 }
@@ -18,12 +18,13 @@ export interface DeliveryVsCookingResult {
   differencePerMeal: number
   totalSaving: number
   winner: Winner
+  breakEvenMealCount?: number
 }
 
 export interface HandoffToRecipes {
   fromCalculator: true
   ingredientCost: number
-  expectedMealCount: number
+  cookingMealCount: number
   winner: Winner
 }
 
