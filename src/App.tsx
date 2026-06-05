@@ -7,6 +7,8 @@ import ResignationPage from './pages/tools/ResignationPage'
 import WasteSortingPage from './pages/tools/WasteSortingPage'
 import RoomSimulatorPage from './pages/tools/RoomSimulatorPage'
 import SubscriptionPage from './pages/tools/SubscriptionPage'
+import DeliveryVsCookingPage from './pages/tools/DeliveryVsCookingPage'
+import FridgeRecipesPage from './pages/tools/FridgeRecipesPage'
 import ComingSoonPage from './pages/ComingSoonPage'
 
 function AnimatedRoutes() {
@@ -21,6 +23,8 @@ function AnimatedRoutes() {
         <Route path="/tools/waste-sorting" element={<WasteSortingPage />} />
         <Route path="/tools/room-simulator" element={<RoomSimulatorPage />} />
         <Route path="/tools/subscription" element={<SubscriptionPage />} />
+        <Route path="/tools/delivery-vs-cooking" element={<DeliveryVsCookingPage />} />
+        <Route path="/tools/fridge-recipes" element={<FridgeRecipesPage />} />
         <Route path="/tools/savings-goal" element={<ComingSoonPage toolId="savings-goal" />} />
         <Route path="/tools/retirement" element={<ComingSoonPage toolId="retirement" />} />
         <Route path="/tools/date" element={<ComingSoonPage toolId="date" />} />

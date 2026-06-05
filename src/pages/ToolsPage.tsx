@@ -3,7 +3,7 @@ import { TOOLS, CATEGORY_LABELS, type ToolCategory } from '../data/tools'
 import { ToolSection } from '../components/tools/ToolSection'
 import { AdBannerSlot } from '../components/ads/AdBannerSlot'
 
-const CATEGORIES: ToolCategory[] = ['money', 'work', 'utility']
+const CATEGORIES: ToolCategory[] = ['money', 'work', 'utility', 'food']
 
 const availableTools = TOOLS.filter(t => t.status === 'available')
 const comingSoonTools = TOOLS.filter(t => t.status === 'coming-soon')

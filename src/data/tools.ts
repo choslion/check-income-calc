@@ -1,5 +1,5 @@
 export type ToolStatus = 'available' | 'coming-soon'
-export type ToolCategory = 'money' | 'work' | 'utility'
+export type ToolCategory = 'money' | 'work' | 'utility' | 'food'
 
 export interface Tool {
   id: string
@@ -52,6 +52,22 @@ export const TOOLS: Tool[] = [
     status: 'available',
   },
   {
+    id: 'delivery-vs-cooking',
+    title: '배달 vs 요리 계산기',
+    description: '배달시킬까, 해먹을까? 재료비와 끼니 수로 1끼당 비용을 비교해요.',
+    path: '/tools/delivery-vs-cooking',
+    category: 'food',
+    status: 'available',
+  },
+  {
+    id: 'fridge-recipes',
+    title: '냉장고 재료 요리 추천',
+    description: '집에 있는 재료와 조미료로 만들 수 있는 메뉴를 찾아요.',
+    path: '/tools/fridge-recipes',
+    category: 'food',
+    status: 'available',
+  },
+  {
     id: 'savings-goal',
     title: '저축 목표 계산기',
     description: '목표 금액과 기간을 설정하고 매달 얼마씩 저축해야 하는지 계산하세요.',
@@ -89,6 +105,7 @@ export const CATEGORY_LABELS: Record<ToolCategory, string> = {
   money: '머니 관리',
   work: '직장 생활',
   utility: '일상 유틸',
+  food: '먹거리 / 식비',
 }
 
 export function getToolById(id: string): Tool | undefined {
