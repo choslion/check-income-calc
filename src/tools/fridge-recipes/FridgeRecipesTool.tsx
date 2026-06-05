@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, Clock, ChefHat } from 'lucide-react'
-import { RECIPES, MAIN_INGREDIENTS, SEASONINGS } from './data/recipes'
+import { ChevronRight, ChevronDown, ChefHat, Clock, X } from 'lucide-react'
+import { RECIPES, MAIN_INGREDIENTS, SEASONING_GROUPS, PRESETS } from './data/recipes'
 import { matchRecipes } from './utils/matcher'
-import { DIFFICULTY_LABEL } from './types'
+import { DIFFICULTY_LABEL, RESULT_GROUP_LABEL } from './types'
+import type { ResultGroup } from './types'
 import type { HandoffToRecipes } from '../delivery-vs-cooking/types'
 
 const HANDOFF_KEY = 'food-budget-handoff'
@@ -28,13 +29,18 @@ function Chip({ label, selected, onClick }: { label: string; selected: boolean; 
 }
 
 const DIFF_COLOR = { easy: 'var(--success)', normal: 'var(--primary)', hard: 'var(--danger)' }
+const GROUP_COLOR: Record<ResultGroup, string> = {
+  ready: 'var(--success)',
+  almostReady: 'var(--on-dark-mute)',
+}
 
 export function FridgeRecipesTool() {
   const navigate = useNavigate()
   const [selectedIngredients, setSelectedIngredients] = useState<Set<string>>(new Set())
-  const [selectedSeasonings, setSelectedSeasonings] = useState<Set<string>>(new Set())
-  const [customInput, setCustomInput] = useState('')
+  const [selectedSeasonings, setSelectedSeasonings]   = useState<Set<string>>(new Set())
+  const [customInput, setCustomInput]       = useState('')
   const [customIngredients, setCustomIngredients] = useState<string[]>([])
+  const [expandedSteps, setExpandedSteps]   = useState<Set<string>>(new Set())
   const [fromCalc, setFromCalc] = useState<HandoffToRecipes | null>(null)
 
   useEffect(() => {
@@ -42,10 +48,7 @@ export function FridgeRecipesTool() {
       const raw = sessionStorage.getItem(HANDOFF_KEY)
       if (!raw) return
       const data = JSON.parse(raw) as HandoffToRecipes
-      if (data.fromCalculator) {
-        setFromCalc(data)
-        sessionStorage.removeItem(HANDOFF_KEY)
-      }
+      if (data.fromCalculator) { setFromCalc(data); sessionStorage.removeItem(HANDOFF_KEY) }
     } catch { /* ignore */ }
   }, [])
 
@@ -65,6 +68,17 @@ export function FridgeRecipesTool() {
     })
   }
 
+  function clearAll() {
+    setSelectedIngredients(new Set())
+    setSelectedSeasonings(new Set())
+    setCustomIngredients([])
+  }
+
+  function applyPreset(preset: typeof PRESETS[number]) {
+    setSelectedIngredients(prev => new Set([...prev, ...preset.ingredients]))
+    setSelectedSeasonings(prev => new Set([...prev, ...preset.seasonings]))
+  }
+
   function addCustomIngredient() {
     const trimmed = customInput.trim()
     if (!trimmed || customIngredients.includes(trimmed)) { setCustomInput(''); return }
@@ -73,66 +87,130 @@ export function FridgeRecipesTool() {
     setCustomInput('')
   }
 
-  const allIngredients = [...Array.from(selectedIngredients), ...customIngredients.filter(c => !selectedIngredients.has(c))]
+  function quickAdd(item: string, type: 'ingredient' | 'seasoning') {
+    if (type === 'ingredient') setSelectedIngredients(prev => new Set([...prev, item]))
+    else setSelectedSeasonings(prev => new Set([...prev, item]))
+  }
 
+  function toggleSteps(id: string) {
+    setExpandedSteps(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  function goToCalculator(recipeName: string) {
+    sessionStorage.setItem(HANDOFF_KEY, JSON.stringify({ fromRecommender: true, selectedRecipeName: recipeName }))
+    navigate('/tools/delivery-vs-cooking')
+  }
+
+  const allIngredients = Array.from(selectedIngredients)
   const matches = useMemo(
     () => matchRecipes(allIngredients, Array.from(selectedSeasonings), RECIPES),
     [allIngredients, selectedSeasonings]
   )
 
-  const hasSelection = selectedIngredients.size > 0
+  const totalSelected   = selectedIngredients.size + selectedSeasonings.size
+  const selectedPreview = [...selectedIngredients, ...selectedSeasonings]
+  const previewText     = selectedPreview.slice(0, 3).join(', ')
+  const overflow        = totalSelected > 3 ? totalSelected - 3 : 0
 
-  function goToCalculator(recipeName: string) {
-    sessionStorage.setItem(HANDOFF_KEY, JSON.stringify({
-      fromRecommender: true,
-      selectedRecipeName: recipeName,
-    }))
-    navigate('/tools/delivery-vs-cooking')
-  }
+  const hasIngredients = selectedIngredients.size > 0
+  const hasSeasonings  = selectedSeasonings.size > 0
+  const hasSelection   = hasIngredients
 
-  const card = { backgroundColor: 'var(--surface-card)', borderRadius: 'var(--radius-card)', padding: '20px' }
-  const sectionTitle = { color: 'var(--on-dark-mute)', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const, marginBottom: 12 }
-  const chip = (s: boolean) => ({ backgroundColor: s ? 'rgba(14,203,129,0.15)' : 'var(--surface-input)', color: s ? 'var(--success)' : 'var(--on-dark-mute)', borderRadius: 'var(--radius-pill)', fontSize: 11, padding: '2px 8px', border: `1px solid ${s ? 'rgba(14,203,129,0.3)' : 'var(--hairline)'}` })
+  const readyRecipes      = matches.filter(m => m.group === 'ready')
+  const almostReadyRecipes = matches.filter(m => m.group === 'almostReady')
+
+  const CARD = { backgroundColor: 'var(--surface-card)', borderRadius: 'var(--radius-card)', padding: '16px' }
+  const SEC  = { color: 'var(--on-dark-mute)', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const, marginBottom: 10 }
+  const tagStyle = (ok: boolean) => ({
+    backgroundColor: ok ? 'rgba(14,203,129,0.12)' : 'var(--surface-input)',
+    color: ok ? 'var(--success)' : 'var(--danger)',
+    borderRadius: 'var(--radius-pill)',
+    fontSize: 11,
+    padding: '2px 8px',
+    border: `1px solid ${ok ? 'rgba(14,203,129,0.3)' : 'rgba(246,70,93,0.3)'}`,
+  })
 
   return (
     <div className="px-4 py-8">
-      <div className="max-w-xl mx-auto space-y-4">
+      <div className="max-w-xl mx-auto space-y-3">
 
         {/* Header */}
-        <div className="mb-2">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-1" style={{ color: 'var(--on-dark-mute)' }}>
-            Food / Meal Budget
-          </p>
-          <h1 className="text-3xl font-bold leading-none" style={{ color: 'var(--on-dark)', letterSpacing: '-0.6px' }}>
-            냉장고 재료 요리 추천
-          </h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--on-dark-mute)' }}>
-            있는 재료와 조미료를 골라보세요
-          </p>
+        <div className="mb-1">
+          <p className="text-xs font-semibold tracking-widest uppercase mb-1" style={{ color: 'var(--on-dark-mute)' }}>Food / Meal Budget</p>
+          <h1 className="text-3xl font-bold leading-none" style={{ color: 'var(--on-dark)', letterSpacing: '-0.6px' }}>냉장고 재료 요리 추천</h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--on-dark-mute)' }}>있는 재료와 조미료를 골라보세요</p>
         </div>
 
-        {/* Contextual message from calculator */}
+        {/* Contextual message */}
         {fromCalc && (
           <div className="px-4 py-3 rounded-xl text-sm" style={{ backgroundColor: 'rgba(14,203,129,0.06)', border: '1px solid var(--hairline)', color: 'var(--on-dark-mute)', lineHeight: 1.6 }}>
-            {fromCalc.winner === 'cooking' ? (
-              <><span style={{ color: 'var(--success)', fontWeight: 600 }}>요리가 더 이득</span>으로 나왔어요.<br /></>
-            ) : (
-              <>비용이 비슷하게 나왔어요.<br /></>
-            )}
+            {fromCalc.winner === 'cooking'
+              ? <><span style={{ color: 'var(--success)', fontWeight: 600 }}>요리가 더 이득</span>으로 나왔어요.<br /></>
+              : <>비용이 비슷하게 나왔어요.<br /></>
+            }
             집에 있는 재료를 입력하면 만들 수 있는 메뉴를 추천해드릴게요.
           </div>
         )}
 
-        {/* Ingredient selector */}
-        <div style={card}>
-          <p style={sectionTitle}>🥦  재료</p>
+        {/* Selected summary + clear */}
+        {totalSelected > 0 && (
+          <div className="flex items-center justify-between px-4 py-2.5 rounded-xl" style={{ backgroundColor: 'var(--surface-input)', border: '1px solid var(--hairline)' }}>
+            <div className="min-w-0">
+              <span className="text-xs font-semibold" style={{ color: 'var(--primary)' }}>선택됨 {totalSelected}개</span>
+              <span className="text-xs ml-2 truncate" style={{ color: 'var(--on-dark-mute)' }}>
+                {previewText}{overflow > 0 ? ` 외 ${overflow}개` : ''}
+              </span>
+            </div>
+            <button
+              onClick={clearAll}
+              className="flex items-center gap-1 text-xs ml-3 shrink-0"
+              style={{ color: 'var(--on-dark-mute)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--danger)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--on-dark-mute)')}
+            >
+              <X size={12} />전체 초기화
+            </button>
+          </div>
+        )}
+
+        {/* Presets */}
+        <div style={CARD}>
+          <p style={SEC}>⚡  빠른 시작</p>
+          <div className="flex flex-wrap gap-2">
+            {PRESETS.map(preset => (
+              <button
+                key={preset.id}
+                onClick={() => applyPreset(preset)}
+                className="px-3 py-1.5 text-sm font-medium transition-colors"
+                style={{ backgroundColor: 'var(--surface-input)', color: 'var(--on-dark)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-pill)', cursor: 'pointer' }}
+                onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--primary)')}
+                onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--hairline)')}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Ingredients */}
+        <div style={CARD}>
+          <p style={SEC}>🥦  재료</p>
           <div className="flex flex-wrap gap-2">
             {MAIN_INGREDIENTS.map(name => (
               <Chip key={name} label={name} selected={selectedIngredients.has(name)} onClick={() => toggleIngredient(name)} />
             ))}
           </div>
-
-          {/* Custom ingredient input */}
+          {customIngredients.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {customIngredients.map(name => (
+                <Chip key={name} label={name} selected={selectedIngredients.has(name)} onClick={() => toggleIngredient(name)} />
+              ))}
+            </div>
+          )}
           <div className="flex gap-2 mt-3">
             <input
               type="text"
@@ -153,103 +231,137 @@ export function FridgeRecipesTool() {
               추가
             </button>
           </div>
+        </div>
 
-          {customIngredients.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-2">
-              {customIngredients.map(name => (
-                <Chip key={name} label={name} selected={selectedIngredients.has(name)} onClick={() => toggleIngredient(name)} />
-              ))}
+        {/* Seasonings — grouped */}
+        <div style={CARD}>
+          {SEASONING_GROUPS.map(group => (
+            <div key={group.id} className="mb-4 last:mb-0">
+              <p style={SEC}>🫙  {group.label}</p>
+              <div className="flex flex-wrap gap-2">
+                {group.items.map(name => (
+                  <Chip key={name} label={name} selected={selectedSeasonings.has(name)} onClick={() => toggleSeasoning(name)} />
+                ))}
+              </div>
             </div>
-          )}
+          ))}
         </div>
 
-        {/* Seasoning selector */}
-        <div style={card}>
-          <p style={sectionTitle}>🫙  조미료</p>
-          <div className="flex flex-wrap gap-2">
-            {SEASONINGS.map(name => (
-              <Chip key={name} label={name} selected={selectedSeasonings.has(name)} onClick={() => toggleSeasoning(name)} />
-            ))}
-          </div>
-        </div>
-
-        {/* Empty state */}
+        {/* Empty / no-result state */}
         {!hasSelection && (
-          <div className="text-center py-6" style={{ color: 'var(--on-dark-mute)', fontSize: 13 }}>
+          <div className="text-center py-4" style={{ color: 'var(--on-dark-mute)', fontSize: 13 }}>
             냉장고에 있는 재료와 조미료를 고르면<br />만들 수 있는 메뉴를 추천해드릴게요.
           </div>
         )}
 
-        {/* No matches */}
-        {hasSelection && matches.length === 0 && (
-          <div className="text-center py-6" style={{ color: 'var(--on-dark-mute)', fontSize: 13 }}>
-            현재 재료로 만들 수 있는 메뉴가 없어요.<br />재료나 조미료를 더 추가해보세요.
-          </div>
+        {hasSelection && matches.length === 0 && (() => {
+          const noSeasonings = !hasSeasonings
+          const suggestions = noSeasonings
+            ? [{ item: '간장', type: 'seasoning' as const }, { item: '식용유', type: 'seasoning' as const }]
+            : [{ item: '계란', type: 'ingredient' as const }, { item: '대파', type: 'ingredient' as const }, { item: '간장', type: 'seasoning' as const }, { item: '식용유', type: 'seasoning' as const }]
+          return (
+            <div className="px-4 py-4 rounded-xl text-sm" style={{ backgroundColor: 'var(--surface-card)', border: '1px solid var(--hairline)', color: 'var(--on-dark-mute)', lineHeight: 1.65 }}>
+              <p className="font-semibold mb-1" style={{ color: 'var(--on-dark)' }}>추천 결과가 아직 부족해요.</p>
+              <p className="text-xs mb-3">
+                {noSeasonings
+                  ? '조미료를 추가하면 더 많은 메뉴가 나와요. 간장이나 식용유부터 선택해보세요.'
+                  : '계란, 대파, 간장, 식용유처럼 자주 쓰는 재료를 추가하면 더 많은 메뉴가 나올 수 있어요.'}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {suggestions
+                  .filter(s => !(s.type === 'ingredient' ? selectedIngredients : selectedSeasonings).has(s.item))
+                  .map(s => (
+                    <button
+                      key={s.item}
+                      onClick={() => quickAdd(s.item, s.type)}
+                      className="px-3 py-1.5 text-xs font-semibold transition-colors"
+                      style={{ backgroundColor: 'var(--surface-input)', color: 'var(--primary)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-pill)', cursor: 'pointer' }}
+                    >
+                      + {s.item}
+                    </button>
+                  ))}
+              </div>
+            </div>
+          )
+        })()}
+
+        {/* Recipe results — grouped */}
+        {([['ready', readyRecipes], ['almostReady', almostReadyRecipes]] as [ResultGroup, typeof matches][]).map(
+          ([group, list]) => list.length === 0 ? null : (
+            <div key={group}>
+              <p className="text-xs font-semibold mb-2 px-1" style={{ color: GROUP_COLOR[group] }}>
+                {RESULT_GROUP_LABEL[group]}
+              </p>
+              <div className="space-y-3">
+                {list.map(({ recipe, availableIngredients, missingRequiredIngredients, availableSeasonings, missingRequiredSeasonings }) => (
+                  <div key={recipe.id} style={CARD}>
+                    {/* Card header */}
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <h3 className="font-bold text-base" style={{ color: 'var(--on-dark)' }}>{recipe.name}</h3>
+                        <p className="text-xs mt-0.5" style={{ color: 'var(--on-dark-mute)' }}>{recipe.reason}</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0 ml-3">
+                        <span className="text-xs" style={{ color: DIFF_COLOR[recipe.difficulty] }}>{DIFFICULTY_LABEL[recipe.difficulty]}</span>
+                        <span className="flex items-center gap-0.5 text-xs" style={{ color: 'var(--on-dark-mute)' }}>
+                          <Clock size={11} />{recipe.estimatedTimeMinutes}분
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Ingredients row */}
+                    <div className="space-y-1.5 mb-3">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-xs shrink-0" style={{ color: 'var(--on-dark-mute)', minWidth: 46 }}>있는 재료</span>
+                        {availableIngredients.map(i => <span key={i} style={tagStyle(true)}>{i}</span>)}
+                        {missingRequiredIngredients.map(i => <span key={i} style={tagStyle(false)}>{i} 필요</span>)}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-xs shrink-0" style={{ color: 'var(--on-dark-mute)', minWidth: 46 }}>있는 조미료</span>
+                        {availableSeasonings.map(s => <span key={s} style={tagStyle(true)}>{s}</span>)}
+                        {missingRequiredSeasonings.map(s => <span key={s} style={tagStyle(false)}>{s} 필요</span>)}
+                      </div>
+                    </div>
+
+                    {/* Steps toggle */}
+                    <button
+                      onClick={() => toggleSteps(recipe.id)}
+                      className="flex items-center gap-1.5 text-xs mb-3"
+                      style={{ color: 'var(--on-dark-mute)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                    >
+                      <ChevronDown size={13} style={{ transform: expandedSteps.has(recipe.id) ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                      {expandedSteps.has(recipe.id) ? '조리 순서 접기' : '조리 순서 보기'}
+                    </button>
+
+                    {expandedSteps.has(recipe.id) && (
+                      <div className="space-y-1 mb-3">
+                        {recipe.simpleSteps.map((step, i) => (
+                          <div key={i} className="flex gap-2 text-xs" style={{ color: 'var(--on-dark-mute)' }}>
+                            <span style={{ color: 'var(--primary)', fontWeight: 700, minWidth: 14 }}>{i + 1}</span>
+                            <span>{step}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* CTA */}
+                    <button
+                      onClick={() => goToCalculator(recipe.name)}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold transition-colors"
+                      style={{ backgroundColor: 'var(--surface-input)', color: 'var(--on-dark-mute)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-pill)', cursor: 'pointer' }}
+                      onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.color = 'var(--primary)' }}
+                      onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--hairline)'; e.currentTarget.style.color = 'var(--on-dark-mute)' }}
+                    >
+                      <ChefHat size={13} />
+                      배달보다 얼마나 아끼는지 계산하기
+                      <ChevronRight size={13} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
         )}
-
-        {/* Recipe cards */}
-        {matches.map(({ recipe, availableIngredients, missingRequiredIngredients, availableSeasonings, missingRequiredSeasonings }) => (
-          <div key={recipe.id} style={card}>
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <h3 className="font-bold text-base" style={{ color: 'var(--on-dark)' }}>{recipe.name}</h3>
-                <p className="text-xs mt-0.5" style={{ color: 'var(--on-dark-mute)' }}>{recipe.reason}</p>
-              </div>
-              <div className="flex items-center gap-2 shrink-0 ml-3">
-                <span className="text-xs" style={{ color: DIFF_COLOR[recipe.difficulty] }}>{DIFFICULTY_LABEL[recipe.difficulty]}</span>
-                <span className="flex items-center gap-0.5 text-xs" style={{ color: 'var(--on-dark-mute)' }}>
-                  <Clock size={11} />
-                  {recipe.estimatedTimeMinutes}분
-                </span>
-              </div>
-            </div>
-
-            {/* Ingredients */}
-            <div className="space-y-2 mb-3">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-xs" style={{ color: 'var(--on-dark-mute)', minWidth: 48 }}>있는 재료</span>
-                {availableIngredients.map(i => <span key={i} style={chip(true)}>{i}</span>)}
-                {missingRequiredIngredients.map(i => (
-                  <span key={i} style={{ ...chip(false), color: 'var(--danger)', borderColor: 'rgba(246,70,93,0.3)' }}>
-                    {i} 필요
-                  </span>
-                ))}
-              </div>
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-xs" style={{ color: 'var(--on-dark-mute)', minWidth: 48 }}>있는 조미료</span>
-                {availableSeasonings.map(s => <span key={s} style={chip(true)}>{s}</span>)}
-                {missingRequiredSeasonings.map(s => (
-                  <span key={s} style={{ ...chip(false), color: 'var(--danger)', borderColor: 'rgba(246,70,93,0.3)' }}>
-                    {s} 필요
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Steps */}
-            <div className="space-y-1 mb-4">
-              {recipe.simpleSteps.map((step, i) => (
-                <div key={i} className="flex gap-2 text-xs" style={{ color: 'var(--on-dark-mute)' }}>
-                  <span style={{ color: 'var(--primary)', fontWeight: 700, minWidth: 14 }}>{i + 1}</span>
-                  <span>{step}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* CTA to calculator */}
-            <button
-              onClick={() => goToCalculator(recipe.name)}
-              className="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold transition-colors"
-              style={{ backgroundColor: 'var(--surface-input)', color: 'var(--on-dark-mute)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-pill)', cursor: 'pointer' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.color = 'var(--primary)' }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--hairline)'; e.currentTarget.style.color = 'var(--on-dark-mute)' }}
-            >
-              <ChefHat size={13} />
-              배달보다 얼마나 아끼는지 계산하기
-              <ChevronRight size={13} />
-            </button>
-          </div>
-        ))}
       </div>
     </div>
   )

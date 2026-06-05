@@ -7,7 +7,7 @@ export const RECIPES: Recipe[] = [
     requiredIngredients: ['밥', '김치'],
     optionalIngredients: ['계란', '대파', '참치'],
     requiredSeasonings: ['식용유', '간장'],
-    optionalSeasonings: ['참기름', '고춧가루'],
+    optionalSeasonings: ['참기름', '고춧가루', '깨'],
     difficulty: 'easy',
     estimatedTimeMinutes: 15,
     reason: '남은 김치와 밥을 빠르게 소진할 수 있어요.',
@@ -19,7 +19,7 @@ export const RECIPES: Recipe[] = [
     requiredIngredients: ['밥', '계란'],
     optionalIngredients: ['대파'],
     requiredSeasonings: ['간장', '참기름', '식용유'],
-    optionalSeasonings: ['설탕'],
+    optionalSeasonings: ['설탕', '깨'],
     difficulty: 'easy',
     estimatedTimeMinutes: 10,
     reason: '재료 2가지로 바로 만들 수 있어요.',
@@ -29,7 +29,7 @@ export const RECIPES: Recipe[] = [
     id: 'egg-fried-rice',
     name: '계란볶음밥',
     requiredIngredients: ['밥', '계란', '양파'],
-    optionalIngredients: ['대파', '당근'],
+    optionalIngredients: ['대파'],
     requiredSeasonings: ['식용유', '간장'],
     optionalSeasonings: ['참기름', '소금', '후추'],
     difficulty: 'easy',
@@ -43,7 +43,7 @@ export const RECIPES: Recipe[] = [
     requiredIngredients: ['두부', '김치'],
     optionalIngredients: ['계란', '대파', '양파'],
     requiredSeasonings: ['고추장', '고춧가루', '식용유'],
-    optionalSeasonings: ['간장', '다진마늘', '참기름'],
+    optionalSeasonings: ['간장', '다진마늘', '참기름', '치킨스톡'],
     difficulty: 'normal',
     estimatedTimeMinutes: 20,
     reason: '두부와 김치로 얼큰하고 따뜻한 찌개를 만들 수 있어요.',
@@ -55,7 +55,7 @@ export const RECIPES: Recipe[] = [
     requiredIngredients: ['두부'],
     optionalIngredients: ['양파', '대파', '감자', '버섯'],
     requiredSeasonings: ['된장', '다진마늘'],
-    optionalSeasonings: ['간장', '고춧가루', '멸치액젓', '까나리액젓'],
+    optionalSeasonings: ['간장', '고춧가루', '치킨스톡'],
     difficulty: 'normal',
     estimatedTimeMinutes: 25,
     reason: '된장과 두부만 있으면 진한 국물 요리를 만들 수 있어요.',
@@ -67,7 +67,7 @@ export const RECIPES: Recipe[] = [
     requiredIngredients: ['두부'],
     optionalIngredients: ['대파', '양파'],
     requiredSeasonings: ['간장', '고추장', '설탕', '식용유'],
-    optionalSeasonings: ['다진마늘', '참기름', '고춧가루'],
+    optionalSeasonings: ['다진마늘', '참기름', '고춧가루', '깨'],
     difficulty: 'easy',
     estimatedTimeMinutes: 20,
     reason: '두부만으로 반찬 한 가지를 뚝딱 만들 수 있어요.',
@@ -79,11 +79,11 @@ export const RECIPES: Recipe[] = [
     requiredIngredients: ['밥', '참치'],
     optionalIngredients: ['계란', '대파', '양파'],
     requiredSeasonings: ['마요네즈', '간장'],
-    optionalSeasonings: ['참기름', '설탕', '고춧가루'],
+    optionalSeasonings: ['참기름', '설탕', '고춧가루', '깨'],
     difficulty: 'easy',
     estimatedTimeMinutes: 10,
     reason: '참치캔 하나로 간단하게 한 끼를 해결할 수 있어요.',
-    simpleSteps: ['참치의 기름을 제거해요', '간장·참기름으로 양념해요', '밥 위에 올려요'],
+    simpleSteps: ['참치의 기름을 제거해요', '간장·마요네즈로 양념해요', '밥 위에 올려요'],
   },
   {
     id: 'jeyuk-bokkeum',
@@ -91,7 +91,7 @@ export const RECIPES: Recipe[] = [
     requiredIngredients: ['돼지고기', '양파'],
     optionalIngredients: ['대파', '양배추', '버섯'],
     requiredSeasonings: ['고추장', '간장', '설탕', '식용유', '다진마늘'],
-    optionalSeasonings: ['고춧가루', '참기름', '굴소스'],
+    optionalSeasonings: ['고춧가루', '참기름', '굴소스', '깨'],
     difficulty: 'normal',
     estimatedTimeMinutes: 25,
     reason: '매콤달콤한 제육볶음으로 밥 한 공기를 뚝딱 해치울 수 있어요.',
@@ -115,7 +115,7 @@ export const RECIPES: Recipe[] = [
     requiredIngredients: ['밥', '계란', '양파'],
     optionalIngredients: ['대파', '버섯', '양배추', '감자'],
     requiredSeasonings: ['고추장', '참기름', '간장', '식용유'],
-    optionalSeasonings: ['설탕', '다진마늘'],
+    optionalSeasonings: ['설탕', '다진마늘', '깨'],
     difficulty: 'normal',
     estimatedTimeMinutes: 30,
     reason: '냉장고 속 자투리 채소를 한 번에 소진할 수 있어요.',
@@ -151,7 +151,7 @@ export const RECIPES: Recipe[] = [
     requiredIngredients: ['닭고기', '양파', '감자'],
     optionalIngredients: ['대파', '버섯'],
     requiredSeasonings: ['간장', '고추장', '고춧가루', '설탕', '다진마늘'],
-    optionalSeasonings: ['굴소스', '참기름'],
+    optionalSeasonings: ['굴소스', '참기름', '치킨스톡'],
     difficulty: 'normal',
     estimatedTimeMinutes: 40,
     reason: '닭고기와 감자로 든든한 한 끼를 만들 수 있어요.',
@@ -163,7 +163,7 @@ export const RECIPES: Recipe[] = [
     requiredIngredients: ['계란'],
     optionalIngredients: ['대파'],
     requiredSeasonings: ['소금'],
-    optionalSeasonings: ['간장', '참기름'],
+    optionalSeasonings: ['간장', '참기름', '깨', '치킨스톡'],
     difficulty: 'easy',
     estimatedTimeMinutes: 15,
     reason: '계란 하나로 부드러운 반찬을 만들 수 있어요.',
@@ -171,14 +171,48 @@ export const RECIPES: Recipe[] = [
   },
 ]
 
+export const SEASONING_GROUPS = [
+  {
+    id: 'basic',
+    label: '기본 조미료',
+    items: ['간장', '소금', '후추', '설탕', '식용유', '참기름', '다진마늘'],
+  },
+  {
+    id: 'korean',
+    label: '한식 양념',
+    items: ['고추장', '된장', '고춧가루', '식초', '올리고당', '들기름', '물엿', '깨', '마요네즈'],
+  },
+  {
+    id: 'special',
+    label: '있으면 좋은',
+    items: ['굴소스', '멸치액젓', '까나리액젓', '맛술', '치킨스톡'],
+  },
+]
+
+export const SEASONINGS = SEASONING_GROUPS.flatMap(g => g.items)
+
 export const MAIN_INGREDIENTS = [
   '밥', '계란', '김치', '두부', '돼지고기', '닭고기', '참치',
   '양파', '대파', '마늘', '감자', '양배추', '버섯',
 ]
 
-export const SEASONINGS = [
-  '간장', '고추장', '고춧가루', '참기름', '들기름', '식용유',
-  '설탕', '올리고당', '물엿', '식초', '소금', '후추',
-  '된장', '다진마늘', '굴소스', '마요네즈', '맛술',
-  '멸치액젓', '까나리액젓',
+export const PRESETS = [
+  {
+    id: 'home-basic',
+    label: '집밥 기본',
+    ingredients: ['밥', '계란'],
+    seasonings: ['간장', '식용유', '참기름'],
+  },
+  {
+    id: 'kimchi-fried-rice',
+    label: '김치볶음밥',
+    ingredients: ['밥', '김치', '계란', '대파'],
+    seasonings: ['간장', '참기름', '식용유'],
+  },
+  {
+    id: 'jjigae-basic',
+    label: '찌개 기본',
+    ingredients: ['두부', '대파', '양파'],
+    seasonings: ['고춧가루', '다진마늘', '간장'],
+  },
 ]
