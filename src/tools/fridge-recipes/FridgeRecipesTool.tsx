@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, ChevronDown, ChefHat, Clock, X } from 'lucide-react'
+import { ChevronRight, ChevronDown, ChefHat, Clock, X, Plus } from 'lucide-react'
 import { RECIPES, MAIN_INGREDIENTS, SEASONING_GROUPS, PRESETS } from './data/recipes'
 import { matchRecipes } from './utils/matcher'
 import { DIFFICULTY_LABEL, RESULT_GROUP_LABEL } from './types'
@@ -8,6 +8,10 @@ import type { ResultGroup } from './types'
 import type { HandoffToRecipes } from '../delivery-vs-cooking/types'
 
 const HANDOFF_KEY = 'food-budget-handoff'
+
+// 자주 쓰는 재료 8개 — 나머지는 "더 보기"로 숨김
+const FREQUENT_INGREDIENTS = ['밥', '계란', '김치', '두부', '돼지고기', '양파', '대파', '참치']
+const MORE_INGREDIENTS = MAIN_INGREDIENTS.filter(i => !FREQUENT_INGREDIENTS.includes(i))
 
 function Chip({ label, selected, onClick }: { label: string; selected: boolean; onClick: () => void }) {
   return (
@@ -43,6 +47,11 @@ export function FridgeRecipesTool() {
   const [expandedSteps, setExpandedSteps]   = useState<Set<string>>(new Set())
   const [fromCalc, setFromCalc] = useState<HandoffToRecipes | null>(null)
 
+  // UI 상태
+  const [showAllIngredients, setShowAllIngredients] = useState(false)
+  const [showCustomInput, setShowCustomInput]       = useState(false)
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['basic']))
+
   useEffect(() => {
     try {
       const raw = sessionStorage.getItem(HANDOFF_KEY)
@@ -64,6 +73,14 @@ export function FridgeRecipesTool() {
     setSelectedSeasonings(prev => {
       const next = new Set(prev)
       next.has(name) ? next.delete(name) : next.add(name)
+      return next
+    })
+  }
+
+  function toggleGroup(id: string) {
+    setExpandedGroups(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
       return next
     })
   }
@@ -120,11 +137,15 @@ export function FridgeRecipesTool() {
   const hasSeasonings  = selectedSeasonings.size > 0
   const hasSelection   = hasIngredients
 
-  const readyRecipes      = matches.filter(m => m.group === 'ready')
+  const readyRecipes       = matches.filter(m => m.group === 'ready')
   const almostReadyRecipes = matches.filter(m => m.group === 'almostReady')
 
+  // "더 보기" 섹션에서 선택된 재료가 있으면 펼쳐진 상태 유지
+  const selectedMoreIngredients = MORE_INGREDIENTS.filter(i => selectedIngredients.has(i))
+  const showMore = showAllIngredients || selectedMoreIngredients.length > 0
+
   const CARD = { backgroundColor: 'var(--surface-card)', borderRadius: 'var(--radius-card)', padding: '16px' }
-  const SEC  = { color: 'var(--on-dark-mute)', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const, marginBottom: 10 }
+  const SEC  = { color: 'var(--on-dark-mute)', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const }
   const tagStyle = (ok: boolean) => ({
     backgroundColor: ok ? 'rgba(14,203,129,0.12)' : 'var(--surface-input)',
     color: ok ? 'var(--success)' : 'var(--danger)',
@@ -179,7 +200,7 @@ export function FridgeRecipesTool() {
 
         {/* Presets */}
         <div style={CARD}>
-          <p style={SEC}>⚡  빠른 시작</p>
+          <p style={{ ...SEC, marginBottom: 10 }}>⚡  빠른 시작</p>
           <div className="flex flex-wrap gap-2">
             {PRESETS.map(preset => (
               <button
@@ -196,14 +217,27 @@ export function FridgeRecipesTool() {
           </div>
         </div>
 
-        {/* Ingredients */}
+        {/* ── 재료 ── */}
         <div style={CARD}>
-          <p style={SEC}>🥦  재료</p>
+          <p style={{ ...SEC, marginBottom: 10 }}>🥦  재료</p>
+
+          {/* 자주 쓰는 재료 */}
           <div className="flex flex-wrap gap-2">
-            {MAIN_INGREDIENTS.map(name => (
+            {FREQUENT_INGREDIENTS.map(name => (
               <Chip key={name} label={name} selected={selectedIngredients.has(name)} onClick={() => toggleIngredient(name)} />
             ))}
           </div>
+
+          {/* 더 보기 섹션 */}
+          {showMore && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {MORE_INGREDIENTS.map(name => (
+                <Chip key={name} label={name} selected={selectedIngredients.has(name)} onClick={() => toggleIngredient(name)} />
+              ))}
+            </div>
+          )}
+
+          {/* 커스텀 입력으로 추가된 것들 */}
           {customIngredients.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-2">
               {customIngredients.map(name => (
@@ -211,49 +245,112 @@ export function FridgeRecipesTool() {
               ))}
             </div>
           )}
-          <div className="flex gap-2 mt-3">
-            <input
-              type="text"
-              value={customInput}
-              onChange={e => setCustomInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && addCustomIngredient()}
-              placeholder="직접 입력 (예: 당근)"
-              className="flex-1 px-3 py-2 text-sm outline-none transition-all"
-              style={{ backgroundColor: 'var(--surface-input)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-input)', color: 'var(--on-dark)' }}
-              onFocus={e => (e.target.style.borderColor = 'var(--info)')}
-              onBlur={e => (e.target.style.borderColor = 'var(--hairline)')}
-            />
-            <button
-              onClick={addCustomIngredient}
-              className="px-3 py-2 text-sm font-semibold"
-              style={{ backgroundColor: 'var(--surface-input)', color: 'var(--on-dark)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-input)', cursor: 'pointer' }}
-            >
-              추가
-            </button>
+
+          {/* 더 보기 / 접기 토글 */}
+          <div className="flex items-center gap-3 mt-3">
+            {!showMore ? (
+              <button
+                onClick={() => setShowAllIngredients(true)}
+                className="flex items-center gap-1.5 text-xs"
+                style={{ color: 'var(--on-dark-mute)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              >
+                <ChevronDown size={13} />
+                재료 더 보기 ({MORE_INGREDIENTS.length}개)
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowAllIngredients(false)}
+                className="flex items-center gap-1.5 text-xs"
+                style={{ color: 'var(--on-dark-mute)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              >
+                <ChevronDown size={13} style={{ transform: 'rotate(180deg)' }} />
+                접기
+              </button>
+            )}
+
+            {/* 직접 입력 토글 */}
+            {!showCustomInput && (
+              <button
+                onClick={() => setShowCustomInput(true)}
+                className="flex items-center gap-1 text-xs"
+                style={{ color: 'var(--on-dark-mute)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              >
+                <Plus size={12} />직접 입력
+              </button>
+            )}
+          </div>
+
+          {/* 커스텀 입력 폼 */}
+          {showCustomInput && (
+            <div className="flex gap-2 mt-3">
+              <input
+                type="text"
+                value={customInput}
+                onChange={e => setCustomInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && addCustomIngredient()}
+                placeholder="재료명 입력 (예: 당근)"
+                className="flex-1 px-3 py-2 text-sm outline-none transition-all"
+                style={{ backgroundColor: 'var(--surface-input)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-input)', color: 'var(--on-dark)' }}
+                onFocus={e => (e.target.style.borderColor = 'var(--info)')}
+                onBlur={e => (e.target.style.borderColor = 'var(--hairline)')}
+                autoFocus
+              />
+              <button
+                onClick={addCustomIngredient}
+                className="px-3 py-2 text-sm font-semibold"
+                style={{ backgroundColor: 'var(--surface-input)', color: 'var(--on-dark)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-input)', cursor: 'pointer' }}
+              >
+                추가
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* ── 조미료 — 그룹별 접기 ── */}
+        <div style={CARD}>
+          <div className="space-y-3">
+            {SEASONING_GROUPS.map((group, idx) => {
+              const isExpanded = expandedGroups.has(group.id)
+              const selectedCount = group.items.filter(i => selectedSeasonings.has(i)).length
+              return (
+                <div key={group.id} className={idx > 0 ? 'pt-3' : ''} style={idx > 0 ? { borderTop: '1px solid var(--hairline)' } : {}}>
+                  <button
+                    onClick={() => toggleGroup(group.id)}
+                    className="flex items-center justify-between w-full mb-0"
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                  >
+                    <span style={{ ...SEC, marginBottom: 0 }}>🫙  {group.label}</span>
+                    <span className="flex items-center gap-2">
+                      {selectedCount > 0 && (
+                        <span className="text-xs font-semibold" style={{ color: 'var(--primary)' }}>{selectedCount}개 선택</span>
+                      )}
+                      {!isExpanded && (
+                        <span className="text-xs" style={{ color: 'var(--on-dark-mute)' }}>{group.items.length}개</span>
+                      )}
+                      <ChevronDown size={14} style={{ color: 'var(--on-dark-mute)', transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                    </span>
+                  </button>
+                  {isExpanded && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {group.items.map(name => (
+                        <Chip key={name} label={name} selected={selectedSeasonings.has(name)} onClick={() => toggleSeasoning(name)} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
         </div>
 
-        {/* Seasonings — grouped */}
-        <div style={CARD}>
-          {SEASONING_GROUPS.map(group => (
-            <div key={group.id} className="mb-4 last:mb-0">
-              <p style={SEC}>🫙  {group.label}</p>
-              <div className="flex flex-wrap gap-2">
-                {group.items.map(name => (
-                  <Chip key={name} label={name} selected={selectedSeasonings.has(name)} onClick={() => toggleSeasoning(name)} />
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Empty / no-result state */}
+        {/* Empty state */}
         {!hasSelection && (
           <div className="text-center py-4" style={{ color: 'var(--on-dark-mute)', fontSize: 13 }}>
             냉장고에 있는 재료와 조미료를 고르면<br />만들 수 있는 메뉴를 추천해드릴게요.
           </div>
         )}
 
+        {/* No result hint */}
         {hasSelection && matches.length === 0 && (() => {
           const noSeasonings = !hasSeasonings
           const suggestions = noSeasonings
@@ -274,7 +371,7 @@ export function FridgeRecipesTool() {
                     <button
                       key={s.item}
                       onClick={() => quickAdd(s.item, s.type)}
-                      className="px-3 py-1.5 text-xs font-semibold transition-colors"
+                      className="px-3 py-1.5 text-xs font-semibold"
                       style={{ backgroundColor: 'var(--surface-input)', color: 'var(--primary)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-pill)', cursor: 'pointer' }}
                     >
                       + {s.item}
@@ -285,7 +382,7 @@ export function FridgeRecipesTool() {
           )
         })()}
 
-        {/* Recipe results — grouped */}
+        {/* Recipe results */}
         {([['ready', readyRecipes], ['almostReady', almostReadyRecipes]] as [ResultGroup, typeof matches][]).map(
           ([group, list]) => list.length === 0 ? null : (
             <div key={group}>
@@ -295,7 +392,6 @@ export function FridgeRecipesTool() {
               <div className="space-y-3">
                 {list.map(({ recipe, availableIngredients, missingRequiredIngredients, availableSeasonings, missingRequiredSeasonings }) => (
                   <div key={recipe.id} style={CARD}>
-                    {/* Card header */}
                     <div className="flex items-start justify-between mb-2">
                       <div>
                         <h3 className="font-bold text-base" style={{ color: 'var(--on-dark)' }}>{recipe.name}</h3>
@@ -309,7 +405,6 @@ export function FridgeRecipesTool() {
                       </div>
                     </div>
 
-                    {/* Ingredients row */}
                     <div className="space-y-1.5 mb-3">
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span className="text-xs shrink-0" style={{ color: 'var(--on-dark-mute)', minWidth: 46 }}>있는 재료</span>
@@ -323,7 +418,6 @@ export function FridgeRecipesTool() {
                       </div>
                     </div>
 
-                    {/* Steps toggle */}
                     <button
                       onClick={() => toggleSteps(recipe.id)}
                       className="flex items-center gap-1.5 text-xs mb-3"
@@ -344,7 +438,6 @@ export function FridgeRecipesTool() {
                       </div>
                     )}
 
-                    {/* CTA */}
                     <button
                       onClick={() => goToCalculator(recipe.name)}
                       className="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold transition-colors"
