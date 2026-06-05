@@ -221,19 +221,12 @@ export function DeliveryVsCookingTool() {
                       onFocus={e => (e.target.style.borderColor = 'var(--info)')}
                       onBlur={e => (e.target.style.borderColor = 'var(--hairline)')}
                     />
-                    <div className="relative shrink-0" style={{ width: 100 }}>
-                      <input
-                        type="text"
-                        inputMode="numeric"
+                    <div className="shrink-0" style={{ width: 110 }}>
+                      <UnitInput
                         value={item.amount}
-                        onChange={e => updateItem(item.id, 'amount', e.target.value.replace(/[^0-9]/g, ''))}
-                        placeholder="0"
-                        className="w-full px-3 py-2 pr-7 text-right text-sm outline-none transition-all"
-                        style={{ ...INPUT_BASE }}
-                        onFocus={e => (e.target.style.borderColor = 'var(--info)')}
-                        onBlur={e => (e.target.style.borderColor = 'var(--hairline)')}
+                        onChange={v => updateItem(item.id, 'amount', v)}
+                        unit="원"
                       />
-                      <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs pointer-events-none" style={{ color: 'var(--muted)' }}>원</span>
                     </div>
                     <button
                       onClick={() => removeItem(item.id)}
