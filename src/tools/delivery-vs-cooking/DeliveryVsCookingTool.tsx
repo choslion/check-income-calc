@@ -54,7 +54,7 @@ function QuickChips({
           <button
             key={chip.value}
             onClick={() => onSelect(String(chip.value))}
-            className="text-xs px-2.5 py-1 transition-colors"
+            className="text-xs px-3 py-1.5 transition-colors"
             style={{
               backgroundColor: selected ? 'rgba(252,213,53,0.12)' : 'transparent',
               color: selected ? 'var(--primary)' : 'var(--on-dark-mute)',
@@ -211,24 +211,22 @@ export function DeliveryVsCookingTool() {
         {/* ── 배달 비용 ── */}
         <div style={CARD}>
           <p style={SEC}>🛵  배달 비용</p>
-          <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="음식 가격">
-                <QuickChips chips={CHIPS.foodPrice} currentValue={deliveryPrice} onSelect={setDeliveryPrice} />
-                <UnitInput value={deliveryPrice} onChange={setDeliveryPrice} unit="원" />
-              </Field>
-              <Field label="배달비">
-                <QuickChips chips={CHIPS.deliveryFee} currentValue={deliveryFee} onSelect={setDeliveryFee} />
-                <UnitInput value={deliveryFee} onChange={setDeliveryFee} unit="원" />
-              </Field>
-              <Field label="할인 금액">
-                <UnitInput value={discount} onChange={setDiscount} unit="원" />
-              </Field>
-              <Field label="이 배달로 먹을 끼니 수">
-                <QuickChips chips={CHIPS.deliveryMeals} currentValue={deliveryMeals} onSelect={setDeliveryMeals} />
-                <UnitInput value={deliveryMeals} onChange={setDeliveryMeals} unit="끼" />
-              </Field>
-            </div>
+          <div className="space-y-4">
+            <Field label="음식 가격">
+              <QuickChips chips={CHIPS.foodPrice} currentValue={deliveryPrice} onSelect={setDeliveryPrice} />
+              <UnitInput value={deliveryPrice} onChange={setDeliveryPrice} unit="원" />
+            </Field>
+            <Field label="배달비">
+              <QuickChips chips={CHIPS.deliveryFee} currentValue={deliveryFee} onSelect={setDeliveryFee} />
+              <UnitInput value={deliveryFee} onChange={setDeliveryFee} unit="원" />
+            </Field>
+            <Field label="할인 금액">
+              <UnitInput value={discount} onChange={setDiscount} unit="원" />
+            </Field>
+            <Field label="이 배달로 먹을 끼니 수">
+              <QuickChips chips={CHIPS.deliveryMeals} currentValue={deliveryMeals} onSelect={setDeliveryMeals} />
+              <UnitInput value={deliveryMeals} onChange={setDeliveryMeals} unit="끼" />
+            </Field>
             <p style={HINT}>혼자 2번 먹거나 둘이 한 번 먹으면 2끼로 계산해요.</p>
           </div>
         </div>
