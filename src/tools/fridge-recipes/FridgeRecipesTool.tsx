@@ -193,7 +193,7 @@ export function FridgeRecipesTool() {
               onMouseEnter={e => (e.currentTarget.style.color = 'var(--danger)')}
               onMouseLeave={e => (e.currentTarget.style.color = 'var(--on-dark-mute)')}
             >
-              <X size={12} />전체 초기화
+              <X size={12} aria-hidden="true" />전체 초기화
             </button>
           </div>
         )}
@@ -277,7 +277,7 @@ export function FridgeRecipesTool() {
                 onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.color = 'var(--primary)' }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--hairline)'; e.currentTarget.style.color = 'var(--on-dark-mute)' }}
               >
-                <Plus size={13} />직접 입력
+                <Plus size={13} aria-hidden="true" />직접 입력
               </button>
             )}
           </div>
@@ -290,6 +290,7 @@ export function FridgeRecipesTool() {
                 value={customInput}
                 onChange={e => setCustomInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && addCustomIngredient()}
+                aria-label="직접 입력할 재료명"
                 placeholder="재료명 입력 (예: 당근)"
                 className="flex-1 px-3 py-2 text-sm outline-none transition-all"
                 style={{ backgroundColor: 'var(--surface-input)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-input)', color: 'var(--on-dark)' }}
@@ -447,9 +448,9 @@ export function FridgeRecipesTool() {
                       onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.color = 'var(--primary)' }}
                       onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--hairline)'; e.currentTarget.style.color = 'var(--on-dark-mute)' }}
                     >
-                      <ChefHat size={13} />
+                      <ChefHat size={13} aria-hidden="true" />
                       배달보다 얼마나 아끼는지 계산하기
-                      <ChevronRight size={13} />
+                      <ChevronRight size={13} aria-hidden="true" />
                     </button>
                   </div>
                 ))}

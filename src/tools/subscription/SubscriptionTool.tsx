@@ -274,7 +274,7 @@ export function SubscriptionTool() {
               className="flex items-center gap-1.5 text-xs px-3 py-1.5 font-semibold"
               style={{ color: 'var(--on-dark-mute)', backgroundColor: 'var(--surface-card)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-pill)', cursor: 'pointer' }}
             >
-              <RotateCcw size={12} />
+              <RotateCcw size={12} aria-hidden="true" />
               초기화
             </button>
           )}
@@ -324,7 +324,7 @@ export function SubscriptionTool() {
                 style={{ color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
               >
                 이 구독비를 예산 계산기에 반영하기
-                <ChevronRight size={12} />
+                <ChevronRight size={12} aria-hidden="true" />
               </button>
             </div>
           )}
@@ -673,19 +673,21 @@ export function SubscriptionTool() {
                     <div className="flex items-center shrink-0" style={{ gap: 2 }}>
                       <button
                         onClick={() => startEdit(sub)}
+                        aria-label={`${sub.name} 수정`}
                         style={{ color: isEditing ? 'var(--primary)' : 'var(--on-dark-mute)', background: 'none', border: 'none', cursor: 'pointer', padding: 8, display: 'flex', alignItems: 'center', borderRadius: 6 }}
                         onMouseEnter={e => (e.currentTarget.style.color = 'var(--primary)')}
                         onMouseLeave={e => (e.currentTarget.style.color = isEditing ? 'var(--primary)' : 'var(--on-dark-mute)')}
                       >
-                        <Pencil size={13} />
+                        <Pencil size={13} aria-hidden="true" />
                       </button>
                       <button
                         onClick={() => removeSub(sub.id)}
+                        aria-label={`${sub.name} 삭제`}
                         style={{ color: 'var(--on-dark-mute)', background: 'none', border: 'none', cursor: 'pointer', padding: 8, display: 'flex', alignItems: 'center', borderRadius: 6 }}
                         onMouseEnter={e => (e.currentTarget.style.color = 'var(--danger)')}
                         onMouseLeave={e => (e.currentTarget.style.color = 'var(--on-dark-mute)')}
                       >
-                        <Trash2 size={13} />
+                        <Trash2 size={13} aria-hidden="true" />
                       </button>
                     </div>
                   </div>

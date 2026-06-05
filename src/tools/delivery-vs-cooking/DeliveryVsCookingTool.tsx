@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useId, Children, cloneElement, isValidElement } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight, ChevronDown, Plus, X } from 'lucide-react'
 import type { ReactNode } from 'react'
@@ -31,10 +31,17 @@ const INPUT_BASE = {
 }
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
+  const id = useId()
+  const kids = Children.toArray(children)
+  const enhanced = kids.map((child, idx) =>
+    idx === kids.length - 1 && isValidElement(child)
+      ? cloneElement(child as React.ReactElement<{ id?: string }>, { id })
+      : child
+  )
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-xs font-medium" style={{ color: 'var(--on-dark-mute)' }}>{label}</span>
-      {children}
+      <label htmlFor={id} className="text-xs font-medium" style={{ color: 'var(--on-dark-mute)' }}>{label}</label>
+      {enhanced}
     </div>
   )
 }
@@ -80,13 +87,14 @@ const CHIPS = {
 }
 
 function UnitInput({
-  value, onChange, unit, placeholder = '0',
+  value, onChange, unit, placeholder = '0', id,
 }: {
-  value: string; onChange: (v: string) => void; unit: string; placeholder?: string
+  value: string; onChange: (v: string) => void; unit: string; placeholder?: string; id?: string
 }) {
   return (
     <div className="relative">
       <input
+        id={id}
         type="text"
         inputMode="numeric"
         value={value}
@@ -97,7 +105,7 @@ function UnitInput({
         onFocus={e => (e.target.style.borderColor = 'var(--info)')}
         onBlur={e => (e.target.style.borderColor = 'var(--hairline)')}
       />
-      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs pointer-events-none" style={{ color: 'var(--muted)' }}>
+      <span aria-hidden="true" className="absolute right-3 top-1/2 -translate-y-1/2 text-xs pointer-events-none" style={{ color: 'var(--on-dark-mute)' }}>
         {unit}
       </span>
     </div>
@@ -246,7 +254,7 @@ export function DeliveryVsCookingTool() {
               className="flex items-center gap-1.5 text-xs"
               style={{ color: 'var(--on-dark-mute)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
             >
-              <ChevronDown size={13} style={{ transform: showBreakdown ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+              <ChevronDown size={13} aria-hidden="true" style={{ transform: showBreakdown ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
               재료별로 계산하기
             </button>
 
@@ -269,12 +277,13 @@ export function DeliveryVsCookingTool() {
                     </div>
                     <button
                       onClick={() => removeItem(item.id)}
+                      aria-label={`${item.name || '재료'} 삭제`}
                       className="p-1.5 shrink-0"
                       style={{ color: 'var(--on-dark-mute)', backgroundColor: 'var(--surface-input)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-input)', cursor: 'pointer' }}
                       onMouseEnter={e => (e.currentTarget.style.color = 'var(--danger)')}
                       onMouseLeave={e => (e.currentTarget.style.color = 'var(--on-dark-mute)')}
                     >
-                      <X size={13} />
+                      <X size={13} aria-hidden="true" />
                     </button>
                   </div>
                 ))}
@@ -283,7 +292,7 @@ export function DeliveryVsCookingTool() {
                   className="flex items-center gap-1.5 text-xs"
                   style={{ color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                 >
-                  <Plus size={13} />재료 추가
+                  <Plus size={13} aria-hidden="true" />재료 추가
                 </button>
                 {itemsTotal > 0 && (
                   <div className="flex items-center justify-between pt-2" style={{ borderTop: '1px solid var(--hairline)' }}>
@@ -314,7 +323,7 @@ export function DeliveryVsCookingTool() {
             className="flex items-center gap-1.5 mt-4 text-xs"
             style={{ color: 'var(--on-dark-mute)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
           >
-            <ChevronDown size={13} style={{ transform: showTime ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+            <ChevronDown size={13} aria-hidden="true" style={{ transform: showTime ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
             시간 고려 (선택)
           </button>
           {showTime && (
@@ -397,7 +406,7 @@ export function DeliveryVsCookingTool() {
                   onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--hairline)')}
                 >
                   냉장고 재료로 요리 추천받기
-                  <ChevronRight size={14} />
+                  <ChevronRight size={14} aria-hidden="true" />
                 </button>
               )}
             </div>

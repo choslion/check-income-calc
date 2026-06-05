@@ -56,6 +56,7 @@ export function ExpenseItem({ item, salary, onUpdate, onDelete }: Props) {
         <div className="flex-1 min-w-0">
           <input
             type="text"
+            aria-label="항목명"
             value={item.name}
             onChange={handleNameChange}
             onBlur={handleNameBlur}
@@ -80,6 +81,7 @@ export function ExpenseItem({ item, salary, onUpdate, onDelete }: Props) {
           <input
             type="text"
             inputMode="numeric"
+            aria-label="금액 (원)"
             value={amountRaw}
             onChange={handleAmountChange}
             onBlur={handleAmountBlur}
@@ -89,20 +91,20 @@ export function ExpenseItem({ item, salary, onUpdate, onDelete }: Props) {
             onFocus={(e) => (e.target.style.borderColor = 'var(--info)')}
             onBlurCapture={(e) => (e.target.style.borderColor = 'var(--hairline)')}
           />
-          <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--muted)' }}>
+          <span aria-hidden="true" className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--on-dark-mute)' }}>
             원
           </span>
         </div>
 
         <button
           onClick={() => onDelete(item.id)}
+          aria-label={`${item.name || '항목'} 삭제`}
           className="p-2.5 shrink-0 transition-colors"
           style={{ color: 'var(--on-dark-mute)', backgroundColor: 'var(--surface-input)', borderRadius: 'var(--radius-input)' }}
           onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--danger)')}
           onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--on-dark-mute)')}
-          aria-label="항목 삭제"
         >
-          <Trash2 size={15} />
+          <Trash2 size={15} aria-hidden="true" />
         </button>
       </div>
 

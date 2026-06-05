@@ -82,3 +82,13 @@ body {
 .page-enter {
   animation: page-enter 0.22s ease-out both;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter { animation: none; }
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}

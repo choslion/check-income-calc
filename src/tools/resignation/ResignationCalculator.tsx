@@ -65,7 +65,7 @@ export function ResignationCalculator() {
             onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--danger)')}
             onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--on-dark-mute)')}
           >
-            <RotateCcw size={12} />
+            <RotateCcw size={12} aria-hidden="true" />
             초기화
           </button>
         </div>
