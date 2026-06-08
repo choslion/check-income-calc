@@ -101,10 +101,10 @@ export const TOOLS: Tool[] = [
   {
     id: 'date',
     title: '날짜 계산기',
-    description: 'D-day, 날짜 간격, 특정일 계산을 빠르게 처리하세요.',
+    description: 'D-day, 두 날짜 사이 간격, 날짜 더하기·빼기를 한번에 계산하세요.',
     path: '/tools/date',
     category: 'living',
-    status: 'coming-soon',
+    status: 'available',
   },
 ]
 
