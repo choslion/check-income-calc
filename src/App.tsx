@@ -10,6 +10,7 @@ import SubscriptionPage from './pages/tools/SubscriptionPage'
 import DeliveryVsCookingPage from './pages/tools/DeliveryVsCookingPage'
 import FridgeRecipesPage from './pages/tools/FridgeRecipesPage'
 import DatePage from './pages/tools/DatePage'
+import StainRemovalPage from './pages/tools/StainRemovalPage'
 import ComingSoonPage from './pages/ComingSoonPage'
 
 function AnimatedRoutes() {
@@ -30,6 +31,7 @@ function AnimatedRoutes() {
         <Route path="/tools/retirement" element={<ComingSoonPage toolId="retirement" />} />
         <Route path="/tools/date" element={<DatePage />} />
         <Route path="/tools/work-schedule" element={<ComingSoonPage toolId="work-schedule" />} />
+        <Route path="/tools/stain-removal" element={<StainRemovalPage />} />
       </Routes>
     </div>
   )

@@ -91,6 +91,14 @@ export const TOOLS: Tool[] = [
 
   // ── 생활 관리 ─────────────────────────────────────────────
   {
+    id: 'stain-removal',
+    title: '얼룩 제거 가이드',
+    description: '얼룩 종류, 상태, 소재를 선택하면 세탁 전 처리 방법을 알려드려요.',
+    path: '/tools/stain-removal',
+    category: 'living',
+    status: 'available',
+  },
+  {
     id: 'waste-sorting',
     title: '이거 어디 버려?',
     description: '음식물쓰레기인지 일반쓰레기인지 헷갈리는 항목을 빠르게 확인하세요.',
