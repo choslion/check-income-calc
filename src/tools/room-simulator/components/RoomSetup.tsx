@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, Check } from 'lucide-react'
 import type { Room, Unit } from '../types'
 import { ROOM_PRESETS } from '../data/presets'
 
@@ -198,19 +198,30 @@ export function RoomSetup({ room, onRoomChange, onNext }: Props) {
           예시로 시작하기
         </p>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          {ROOM_PRESETS.map(preset => (
+          {ROOM_PRESETS.map(preset => {
+            const isSelected = room.width === preset.width && room.height === preset.height
+            return (
             <button
               key={preset.id}
               onClick={() => handlePreset(preset)}
+              aria-pressed={isSelected}
               style={{
+                position: 'relative',
                 padding: '10px 12px',
-                border: '1px solid var(--hairline)',
+                border: `1px solid ${isSelected ? 'var(--primary)' : 'var(--hairline)'}`,
                 borderRadius: 8,
-                backgroundColor: 'var(--surface-card)',
+                backgroundColor: isSelected ? 'var(--primary-soft, var(--surface-card))' : 'var(--surface-card)',
+                boxShadow: isSelected ? '0 0 0 1px var(--primary)' : 'none',
                 textAlign: 'left',
                 cursor: 'pointer',
               }}
             >
+              {isSelected && (
+                <Check
+                  size={14}
+                  style={{ position: 'absolute', top: 10, right: 10, color: 'var(--primary)' }}
+                />
+              )}
               <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--on-dark)' }}>
                 {preset.label}
               </div>
@@ -228,7 +239,8 @@ export function RoomSetup({ room, onRoomChange, onNext }: Props) {
                 {preset.description}
               </div>
             </button>
-          ))}
+            )
+          })}
         </div>
         <p className="text-xs mt-2" style={{ color: 'var(--muted)' }}>
           실제 방 구조에 따라 달라요. 선택 후 직접 수정하세요.
