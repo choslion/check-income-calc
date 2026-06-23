@@ -15,6 +15,7 @@ export function RoomSetup({ room, onRoomChange, onNext }: Props) {
   const [widthInput, setWidthInput] = useState(String(room.width))
   const [heightInput, setHeightInput] = useState(String(room.height))
   const [errors, setErrors] = useState<{ width?: string; height?: string }>({})
+  const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null)
 
   function toCm(val: string): number {
     const n = parseFloat(val)
@@ -36,12 +37,14 @@ export function RoomSetup({ room, onRoomChange, onNext }: Props) {
 
   function handleWidthChange(val: string) {
     setWidthInput(val)
+    setSelectedPresetId(null)
     const w = toCm(val)
     if (w > 0) onRoomChange({ ...room, width: w })
   }
 
   function handleHeightChange(val: string) {
     setHeightInput(val)
+    setSelectedPresetId(null)
     const h = toCm(val)
     if (h > 0) onRoomChange({ ...room, height: h })
   }
@@ -58,6 +61,7 @@ export function RoomSetup({ room, onRoomChange, onNext }: Props) {
     onRoomChange({ width: preset.width, height: preset.height })
     setWidthInput(unit === 'm' ? (preset.width / 100).toFixed(2) : String(preset.width))
     setHeightInput(unit === 'm' ? (preset.height / 100).toFixed(2) : String(preset.height))
+    setSelectedPresetId(preset.id)
     setErrors({})
   }
 
@@ -199,7 +203,7 @@ export function RoomSetup({ room, onRoomChange, onNext }: Props) {
         </p>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
           {ROOM_PRESETS.map(preset => {
-            const isSelected = room.width === preset.width && room.height === preset.height
+            const isSelected = selectedPresetId === preset.id
             return (
             <button
               key={preset.id}
